@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Criss Binoi's AI design portfolio featuring an album cover redesign and a magical 3D environment.">
+  <title>Criss Binoi — AI Design Portfolio</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body data-page="home">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Criss Binoi portfolio home">
+      <span>CB</span>
+      <small>AI Design Portfolio</small>
+    </a>
+    <nav aria-label="Main navigation">
+      <a class="active" href="index.html">Home</a>
+      <a href="album-cover.html">Album Cover</a>
+      <a href="greenhouse-sanctuary.html">3D Environment</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="home-hero" id="drawing-area" aria-labelledby="hero-title">
+      <canvas id="flower-canvas" aria-hidden="true"></canvas>
+      <div class="hero-copy">
+        <p class="eyebrow">Criss Binoi · AI for Design</p>
+        <h1 id="hero-title">Designing between <em>feeling</em> and <em>place.</em></h1>
+        <p class="hero-intro">Two experiments in atmosphere: a dark romantic album cover and a magical interior built from light, stone, books, and growing things.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#projects">View the work</a>
+          <button class="button quiet" id="clear-garden" type="button">Clear the garden</button>
+        </div>
+      </div>
+      <p class="interaction-note"><span aria-hidden="true">✦</span> Click or tap anywhere to grow a flower.</p>
+    </section>
+
+    <section class="projects-section" id="projects" aria-labelledby="projects-title">
+      <div class="section-heading">
+        <p class="eyebrow">Selected work · 2026</p>
+        <h2 id="projects-title">Two worlds, one love of atmosphere.</h2>
+      </div>
+
+      <div class="project-list">
+        <a class="project-card album-card" href="album-cover.html">
+          <div class="card-image square-image">
+            <img src="assets/unethical-final.png" alt="UNETHICAL album cover with ivory and burgundy flowers wrapped in black lace">
+          </div>
+          <div class="card-copy">
+            <span class="project-number">01</span>
+            <p class="project-type">Album cover · Visual identity</p>
+            <h3>UNETHICAL</h3>
+            <p>A dark floral still life about beauty, control, and emotional tension.</p>
+            <span class="text-link">See the project <span aria-hidden="true">↗</span></span>
+          </div>
+        </a>
+
+        <a class="project-card environment-card" href="greenhouse-sanctuary.html">
+          <div class="card-image wide-image">
+            <img src="assets/greenhouse-final.png" alt="Magical Gothic library and greenhouse interior with a vine arch, candles, and a grand stair">
+          </div>
+          <div class="card-copy">
+            <span class="project-number">02</span>
+            <p class="project-type">3D environment · Spatial storytelling</p>
+            <h3>The Greenhouse Sanctuary</h3>
+            <p>A fantasy library and conservatory shaped by books, candlelight, and living architecture.</p>
+            <span class="text-link">Enter the space <span aria-hidden="true">↗</span></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="about-strip" aria-label="About this portfolio">
+      <p class="eyebrow">About</p>
+      <p>I am Criss Binoi, a designer exploring how AI can help turn a feeling into a visual world. I use iteration to move from a first idea toward a clearer mood, story, and experience.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© <span data-year></span> Criss Binoi</p>
+    <a href="#top">Back to top ↑</a>
+  </footer>
+</body>
+</html>
