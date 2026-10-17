@@ -73,7 +73,7 @@ if (canvas && drawingArea) {
       type: "bee",
       x,
       y,
-      size: randomBetween(10, 17),
+      size: randomBetween(8, 12),
       rotation: randomBetween(-Math.PI, Math.PI),
       colors,
       hasTrail,
@@ -148,20 +148,20 @@ if (canvas && drawingArea) {
     const age = Math.max(0, now - bee.born);
     const progress = reducedMotion ? 1 : Math.min(age / 520, 1);
     const eased = 1 - Math.pow(1 - progress, 3);
-    const wingBeat = reducedMotion || progress === 1 ? 1 : 0.82 + Math.sin(age / 42) * 0.18;
+    const wingBeat = reducedMotion || progress === 1 ? 1 : 0.86 + Math.sin(age / 42) * 0.14;
     const [gold, dark] = bee.colors;
 
     context.save();
     context.translate(bee.x, bee.y);
     context.rotate(bee.rotation);
     context.scale(eased, eased);
-    context.globalAlpha = 0.7 * eased;
+    context.globalAlpha = 0.68 * eased;
 
     if (bee.hasTrail) {
       context.save();
-      context.globalAlpha = 0.28 * eased;
+      context.globalAlpha = 0.24 * eased;
       context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.62)`;
-      context.lineWidth = 1.1;
+      context.lineWidth = 1;
       context.lineCap = "round";
       context.setLineDash([1.5, 6]);
       context.beginPath();
@@ -180,57 +180,52 @@ if (canvas && drawingArea) {
 
     context.save();
     context.scale(1, wingBeat);
-    context.fillStyle = "rgba(244, 240, 226, 0.76)";
-    context.strokeStyle = "rgba(99, 83, 66, 0.35)";
-    context.lineWidth = 0.8;
+    context.fillStyle = "rgba(250, 248, 239, 0.82)";
+    context.strokeStyle = "rgba(85, 72, 60, 0.36)";
+    context.lineWidth = 0.7;
     context.beginPath();
-    context.ellipse(-bee.size * 0.07, -bee.size * 0.38, bee.size * 0.4, bee.size * 0.27, -0.42, 0, Math.PI * 2);
+    context.ellipse(-bee.size * 0.05, -bee.size * 0.47, bee.size * 0.31, bee.size * 0.46, -0.35, 0, Math.PI * 2);
     context.fill();
     context.stroke();
     context.beginPath();
-    context.ellipse(-bee.size * 0.07, bee.size * 0.38, bee.size * 0.4, bee.size * 0.27, 0.42, 0, Math.PI * 2);
+    context.ellipse(bee.size * 0.27, -bee.size * 0.43, bee.size * 0.29, bee.size * 0.4, 0.35, 0, Math.PI * 2);
     context.fill();
     context.stroke();
     context.restore();
 
     context.save();
     context.beginPath();
-    context.ellipse(0, 0, bee.size * 0.58, bee.size * 0.4, 0, 0, Math.PI * 2);
+    context.ellipse(0, 0, bee.size * 0.68, bee.size * 0.45, 0, 0, Math.PI * 2);
     context.clip();
     context.fillStyle = `rgb(${gold[0]}, ${gold[1]}, ${gold[2]})`;
     context.fillRect(-bee.size, -bee.size, bee.size * 2, bee.size * 2);
     context.fillStyle = `rgb(${dark[0]}, ${dark[1]}, ${dark[2]})`;
-    [-0.22, 0.17].forEach((position) => {
-      context.fillRect(bee.size * position, -bee.size * 0.5, bee.size * 0.13, bee.size);
-    });
+    context.fillRect(bee.size * 0.03, -bee.size * 0.55, bee.size * 0.14, bee.size * 1.1);
+    context.fillRect(bee.size * 0.38, -bee.size * 0.55, bee.size * 0.42, bee.size * 1.1);
     context.restore();
 
     context.beginPath();
-    context.ellipse(0, 0, bee.size * 0.58, bee.size * 0.4, 0, 0, Math.PI * 2);
-    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.72)`;
-    context.lineWidth = 0.9;
+    context.ellipse(0, 0, bee.size * 0.68, bee.size * 0.45, 0, 0, Math.PI * 2);
+    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.76)`;
+    context.lineWidth = 0.8;
+    context.stroke();
+
+    context.fillStyle = `rgb(${dark[0]}, ${dark[1]}, ${dark[2]})`;
+    context.beginPath();
+    context.arc(-bee.size * 0.43, -bee.size * 0.11, bee.size * 0.065, 0, Math.PI * 2);
+    context.fill();
+
+    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.82)`;
+    context.lineWidth = 0.75;
+    context.beginPath();
+    context.arc(-bee.size * 0.4, bee.size * 0.04, bee.size * 0.17, 0.18, 1.22);
     context.stroke();
 
     context.beginPath();
-    context.arc(bee.size * 0.5, 0, bee.size * 0.3, 0, Math.PI * 2);
-    context.fillStyle = `rgb(${dark[0]}, ${dark[1]}, ${dark[2]})`;
-    context.fill();
-
-    context.fillStyle = "rgba(246, 239, 218, 0.88)";
-    context.beginPath();
-    context.arc(bee.size * 0.61, -bee.size * 0.09, bee.size * 0.055, 0, Math.PI * 2);
-    context.fill();
-    context.beginPath();
-    context.arc(bee.size * 0.61, bee.size * 0.09, bee.size * 0.055, 0, Math.PI * 2);
-    context.fill();
-
-    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.75)`;
-    context.lineWidth = 0.8;
-    context.beginPath();
-    context.moveTo(bee.size * 0.62, -bee.size * 0.18);
-    context.quadraticCurveTo(bee.size * 0.77, -bee.size * 0.43, bee.size * 0.94, -bee.size * 0.38);
-    context.moveTo(bee.size * 0.62, bee.size * 0.18);
-    context.quadraticCurveTo(bee.size * 0.77, bee.size * 0.43, bee.size * 0.94, bee.size * 0.38);
+    context.moveTo(-bee.size * 0.55, -bee.size * 0.28);
+    context.quadraticCurveTo(-bee.size * 0.72, -bee.size * 0.62, -bee.size * 0.95, -bee.size * 0.5);
+    context.moveTo(-bee.size * 0.42, -bee.size * 0.34);
+    context.quadraticCurveTo(-bee.size * 0.48, -bee.size * 0.7, -bee.size * 0.68, -bee.size * 0.72);
     context.stroke();
     context.restore();
   }
@@ -263,7 +258,7 @@ if (canvas && drawingArea) {
 
   function addSelectedItem(x, y) {
     tapCount += 1;
-    if (tapCount % 3 === 0) createBee(x, y);
+    if (tapCount % 6 === 0) createBee(x, y);
     else createFlower(x, y);
   }
 
