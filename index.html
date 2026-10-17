@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Criss Binoi's AI design portfolio featuring an album cover redesign and a magical 3D environment.">
   <title>Criss Binoi — AI Design Portfolio</title>
-  <link rel="stylesheet" href="styles.css?v=2">
-  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="styles.css?v=3">
+  <script src="script.js?v=3" defer></script>
 </head>
 <body data-page="home">
   <header class="site-header">
@@ -22,18 +22,40 @@
   </header>
 
   <main>
-    <section class="home-hero" id="drawing-area" aria-labelledby="hero-title">
-      <canvas id="flower-canvas" aria-hidden="true"></canvas>
+    <section class="home-hero" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow">Criss Binoi · AI for Design</p>
         <h1 id="hero-title">Designing between <em>feeling</em> and <em>place.</em></h1>
         <p class="hero-intro">Two experiments in atmosphere: a dark romantic album cover and a magical interior built from light, stone, books, and growing things.</p>
         <div class="hero-actions">
           <a class="button primary" href="#projects">View the work</a>
-          <button class="button quiet" id="clear-garden" type="button">Clear the garden</button>
+          <a class="button quiet" href="#garden">Create a garden</a>
         </div>
       </div>
-      <p class="interaction-note"><span aria-hidden="true">✦</span> Click or tap anywhere to grow a flower.</p>
+    </section>
+
+    <section class="garden-section" id="garden" aria-labelledby="garden-title">
+      <div class="garden-heading">
+        <div>
+          <p class="eyebrow">Interactive art</p>
+          <h2 id="garden-title">Create your own garden.</h2>
+        </div>
+        <p>Choose flowers or butterflies, then click or tap inside the garden to bring it to life.</p>
+      </div>
+
+      <div class="garden-frame">
+        <div class="garden-toolbar">
+          <div class="creation-modes" role="group" aria-label="Choose what to add to the garden">
+            <button class="mode-button active" type="button" data-garden-mode="flower" aria-pressed="true">Grow flowers</button>
+            <button class="mode-button" type="button" data-garden-mode="butterfly" aria-pressed="false">Release butterflies</button>
+          </div>
+          <button class="button quiet" id="clear-garden" type="button">Clear the garden</button>
+        </div>
+        <div class="garden-stage" id="drawing-area" tabindex="0" aria-label="Interactive garden drawing area. Choose flowers or butterflies, then click or tap to add one.">
+          <canvas id="flower-canvas" aria-hidden="true"></canvas>
+          <p class="garden-prompt"><span aria-hidden="true">✦</span> <span id="garden-instruction">Tap anywhere to grow a flower.</span></p>
+        </div>
+      </div>
     </section>
 
     <section class="projects-section" id="projects" aria-labelledby="projects-title">
