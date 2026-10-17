@@ -19,12 +19,10 @@ if (canvas && drawingArea) {
     [82, 111, 77],
     [70, 91, 117]
   ];
-  const butterflyPalette = [
-    [[118, 28, 49], [231, 214, 184]],
-    [[57, 81, 105], [196, 155, 95]],
-    [[83, 111, 77], [238, 212, 161]],
-    [[151, 80, 96], [239, 220, 190]],
-    [[190, 126, 56], [86, 54, 43]]
+  const beePalette = [
+    [[225, 170, 55], [52, 42, 31]],
+    [[239, 191, 72], [71, 51, 35]],
+    [[207, 145, 43], [44, 39, 32]]
   ];
   let width = 0;
   let height = 0;
@@ -71,15 +69,14 @@ if (canvas && drawingArea) {
     startAnimation();
   }
 
-  function createButterfly(x, y, delay = 0) {
-    const colors = butterflyPalette[Math.floor(Math.random() * butterflyPalette.length)];
+  function createBee(x, y, delay = 0) {
+    const colors = beePalette[Math.floor(Math.random() * beePalette.length)];
     gardenItems.push({
-      type: "butterfly",
+      type: "bee",
       x,
       y,
-      size: randomBetween(22, 42),
-      rotation: randomBetween(-0.5, 0.5),
-      stretch: randomBetween(0.82, 1.18),
+      size: randomBetween(16, 28),
+      rotation: randomBetween(-0.35, 0.35),
       colors,
       born: performance.now() + delay
     });
@@ -148,79 +145,89 @@ if (canvas && drawingArea) {
     context.restore();
   }
 
-  function drawButterfly(butterfly, now) {
-    const age = Math.max(0, now - butterfly.born);
-    const progress = reducedMotion ? 1 : Math.min(age / 540, 1);
+  function drawBee(bee, now) {
+    const age = Math.max(0, now - bee.born);
+    const progress = reducedMotion ? 1 : Math.min(age / 520, 1);
     const eased = 1 - Math.pow(1 - progress, 3);
-    const wingBeat = reducedMotion || progress === 1 ? 1 : 0.86 + Math.sin(age / 65) * 0.14;
-    const [outer, inner] = butterfly.colors;
+    const wingBeat = reducedMotion || progress === 1 ? 1 : 0.78 + Math.sin(age / 42) * 0.22;
+    const [gold, dark] = bee.colors;
 
     context.save();
-    context.translate(butterfly.x, butterfly.y);
-    context.rotate(butterfly.rotation);
+    context.translate(bee.x, bee.y);
+    context.rotate(bee.rotation);
     context.scale(eased, eased);
-    context.globalAlpha = 0.92 * eased;
+    context.globalAlpha = 0.94 * eased;
 
-    [-1, 1].forEach((side) => {
-      context.save();
-      context.scale(side * wingBeat, butterfly.stretch);
-
-      context.beginPath();
-      context.moveTo(0, 0);
-      context.bezierCurveTo(
-        butterfly.size * 0.22,
-        -butterfly.size * 0.92,
-        butterfly.size * 1.15,
-        -butterfly.size * 0.84,
-        butterfly.size * 0.92,
-        -butterfly.size * 0.08
-      );
-      context.bezierCurveTo(
-        butterfly.size * 0.77,
-        butterfly.size * 0.36,
-        butterfly.size * 0.26,
-        butterfly.size * 0.46,
-        0,
-        butterfly.size * 0.12
-      );
-      context.closePath();
-      context.fillStyle = `rgba(${outer[0]}, ${outer[1]}, ${outer[2]}, 0.86)`;
-      context.strokeStyle = `rgba(${outer[0]}, ${outer[1]}, ${outer[2]}, 1)`;
-      context.lineWidth = 1;
-      context.fill();
-      context.stroke();
-
-      context.beginPath();
-      context.ellipse(
-        butterfly.size * 0.53,
-        -butterfly.size * 0.25,
-        butterfly.size * 0.18,
-        butterfly.size * 0.28,
-        -0.55,
-        0,
-        Math.PI * 2
-      );
-      context.fillStyle = `rgba(${inner[0]}, ${inner[1]}, ${inner[2]}, 0.9)`;
-      context.fill();
-      context.restore();
-    });
-
-    context.strokeStyle = "rgba(44, 37, 31, 0.82)";
-    context.fillStyle = "rgba(44, 37, 31, 0.88)";
+    context.save();
+    context.globalAlpha = 0.42 * eased;
+    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.72)`;
     context.lineWidth = 1.5;
     context.lineCap = "round";
+    context.setLineDash([2, 7]);
     context.beginPath();
-    context.moveTo(0, -butterfly.size * 0.16);
-    context.lineTo(0, butterfly.size * 0.65);
+    context.moveTo(-bee.size * 4.7, bee.size * 0.15);
+    context.bezierCurveTo(
+      -bee.size * 3.5,
+      bee.size * 1.4,
+      -bee.size * 2.35,
+      -bee.size * 1.25,
+      -bee.size * 0.9,
+      bee.size * 0.05
+    );
+    context.stroke();
+    context.restore();
+
+    context.save();
+    context.scale(1, wingBeat);
+    context.fillStyle = "rgba(240, 237, 224, 0.72)";
+    context.strokeStyle = "rgba(84, 73, 61, 0.48)";
+    context.lineWidth = 1;
+    context.beginPath();
+    context.ellipse(-bee.size * 0.08, -bee.size * 0.42, bee.size * 0.52, bee.size * 0.23, -0.35, 0, Math.PI * 2);
+    context.fill();
     context.stroke();
     context.beginPath();
-    context.arc(0, -butterfly.size * 0.2, butterfly.size * 0.1, 0, Math.PI * 2);
+    context.ellipse(-bee.size * 0.08, bee.size * 0.42, bee.size * 0.52, bee.size * 0.23, 0.35, 0, Math.PI * 2);
     context.fill();
+    context.stroke();
+    context.restore();
+
+    context.save();
     context.beginPath();
-    context.moveTo(-1, -butterfly.size * 0.25);
-    context.quadraticCurveTo(-butterfly.size * 0.18, -butterfly.size * 0.52, -butterfly.size * 0.34, -butterfly.size * 0.55);
-    context.moveTo(1, -butterfly.size * 0.25);
-    context.quadraticCurveTo(butterfly.size * 0.18, -butterfly.size * 0.52, butterfly.size * 0.34, -butterfly.size * 0.55);
+    context.ellipse(0, 0, bee.size * 0.76, bee.size * 0.36, 0, 0, Math.PI * 2);
+    context.clip();
+    context.fillStyle = `rgb(${gold[0]}, ${gold[1]}, ${gold[2]})`;
+    context.fillRect(-bee.size, -bee.size, bee.size * 2, bee.size * 2);
+    context.fillStyle = `rgb(${dark[0]}, ${dark[1]}, ${dark[2]})`;
+    [-0.35, 0.02, 0.39].forEach((position) => {
+      context.fillRect(bee.size * position, -bee.size * 0.5, bee.size * 0.16, bee.size);
+    });
+    context.restore();
+
+    context.beginPath();
+    context.ellipse(0, 0, bee.size * 0.76, bee.size * 0.36, 0, 0, Math.PI * 2);
+    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.9)`;
+    context.lineWidth = 1.2;
+    context.stroke();
+
+    context.beginPath();
+    context.arc(bee.size * 0.67, 0, bee.size * 0.28, 0, Math.PI * 2);
+    context.fillStyle = `rgb(${dark[0]}, ${dark[1]}, ${dark[2]})`;
+    context.fill();
+
+    context.beginPath();
+    context.moveTo(-bee.size * 0.76, 0);
+    context.lineTo(-bee.size * 1.02, -bee.size * 0.13);
+    context.lineTo(-bee.size * 1.02, bee.size * 0.13);
+    context.closePath();
+    context.fill();
+
+    context.lineWidth = 1.1;
+    context.beginPath();
+    context.moveTo(bee.size * 0.78, -bee.size * 0.12);
+    context.quadraticCurveTo(bee.size, -bee.size * 0.48, bee.size * 1.18, -bee.size * 0.4);
+    context.moveTo(bee.size * 0.78, bee.size * 0.12);
+    context.quadraticCurveTo(bee.size, bee.size * 0.48, bee.size * 1.18, bee.size * 0.4);
     context.stroke();
     context.restore();
   }
@@ -228,7 +235,7 @@ if (canvas && drawingArea) {
   function draw(now = performance.now()) {
     context.clearRect(0, 0, width, height);
     gardenItems.forEach((item) => {
-      if (item.type === "butterfly") drawButterfly(item, now);
+      if (item.type === "bee") drawBee(item, now);
       else drawFlower(item, now);
     });
     const growing = gardenItems.some((item) => now - item.born < 650);
@@ -247,13 +254,13 @@ if (canvas && drawingArea) {
     [[0.1, 0.25], [0.22, 0.78], [0.75, 0.82], [0.9, 0.35]].forEach(([x, y], index) => {
       createFlower(width * x, height * y, index * 60);
     });
-    [[0.32, 0.25], [0.72, 0.2]].forEach(([x, y], index) => {
-      createButterfly(width * x, height * y, 260 + index * 90);
+    [[0.32, 0.25], [0.72, 0.2], [0.91, 0.6]].forEach(([x, y], index) => {
+      createBee(width * x, height * y, 260 + index * 90);
     });
   }
 
   function addSelectedItem(x, y) {
-    if (activeMode === "butterfly") createButterfly(x, y);
+    if (activeMode === "bee") createBee(x, y);
     else createFlower(x, y);
   }
 
@@ -265,9 +272,9 @@ if (canvas && drawingArea) {
       button.setAttribute("aria-pressed", String(isActive));
     });
     if (gardenInstruction) {
-      gardenInstruction.textContent = mode === "butterfly"
-        ? "Tap anywhere to release a butterfly."
-        : "Tap anywhere to grow a flower.";
+      gardenInstruction.textContent = mode === "bee"
+        ? "Tap the background to add a flying bee."
+        : "Tap the background to grow a flower.";
     }
   }
 
