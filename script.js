@@ -5,8 +5,6 @@ document.querySelectorAll("[data-year]").forEach((node) => {
 const canvas = document.querySelector("#flower-canvas");
 const drawingArea = document.querySelector("#drawing-area");
 const clearButton = document.querySelector("#clear-garden");
-const modeButtons = document.querySelectorAll("[data-garden-mode]");
-const gardenInstruction = document.querySelector("#garden-instruction");
 
 if (canvas && drawingArea) {
   const context = canvas.getContext("2d");
@@ -20,15 +18,15 @@ if (canvas && drawingArea) {
     [70, 91, 117]
   ];
   const beePalette = [
-    [[225, 170, 55], [52, 42, 31]],
-    [[239, 191, 72], [71, 51, 35]],
-    [[207, 145, 43], [44, 39, 32]]
+    [[199, 151, 65], [76, 62, 47]],
+    [[216, 174, 90], [89, 69, 49]],
+    [[187, 137, 56], [70, 61, 50]]
   ];
   let width = 0;
   let height = 0;
   let pixelRatio = 1;
   let animationFrame = 0;
-  let activeMode = "flower";
+  let tapCount = 0;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function resizeCanvas() {
@@ -69,15 +67,16 @@ if (canvas && drawingArea) {
     startAnimation();
   }
 
-  function createBee(x, y, delay = 0) {
+  function createBee(x, y, delay = 0, hasTrail = Math.random() < 0.35) {
     const colors = beePalette[Math.floor(Math.random() * beePalette.length)];
     gardenItems.push({
       type: "bee",
       x,
       y,
-      size: randomBetween(16, 28),
-      rotation: randomBetween(-0.35, 0.35),
+      size: randomBetween(10, 17),
+      rotation: randomBetween(-Math.PI, Math.PI),
       colors,
+      hasTrail,
       born: performance.now() + delay
     });
     if (gardenItems.length > 80) gardenItems.splice(0, gardenItems.length - 80);
@@ -149,85 +148,89 @@ if (canvas && drawingArea) {
     const age = Math.max(0, now - bee.born);
     const progress = reducedMotion ? 1 : Math.min(age / 520, 1);
     const eased = 1 - Math.pow(1 - progress, 3);
-    const wingBeat = reducedMotion || progress === 1 ? 1 : 0.78 + Math.sin(age / 42) * 0.22;
+    const wingBeat = reducedMotion || progress === 1 ? 1 : 0.82 + Math.sin(age / 42) * 0.18;
     const [gold, dark] = bee.colors;
 
     context.save();
     context.translate(bee.x, bee.y);
     context.rotate(bee.rotation);
     context.scale(eased, eased);
-    context.globalAlpha = 0.94 * eased;
+    context.globalAlpha = 0.7 * eased;
 
-    context.save();
-    context.globalAlpha = 0.42 * eased;
-    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.72)`;
-    context.lineWidth = 1.5;
-    context.lineCap = "round";
-    context.setLineDash([2, 7]);
-    context.beginPath();
-    context.moveTo(-bee.size * 4.7, bee.size * 0.15);
-    context.bezierCurveTo(
-      -bee.size * 3.5,
-      bee.size * 1.4,
-      -bee.size * 2.35,
-      -bee.size * 1.25,
-      -bee.size * 0.9,
-      bee.size * 0.05
-    );
-    context.stroke();
-    context.restore();
+    if (bee.hasTrail) {
+      context.save();
+      context.globalAlpha = 0.28 * eased;
+      context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.62)`;
+      context.lineWidth = 1.1;
+      context.lineCap = "round";
+      context.setLineDash([1.5, 6]);
+      context.beginPath();
+      context.moveTo(-bee.size * 3.8, bee.size * 0.12);
+      context.bezierCurveTo(
+        -bee.size * 3,
+        bee.size * 1.2,
+        -bee.size * 2,
+        -bee.size,
+        -bee.size * 0.72,
+        bee.size * 0.04
+      );
+      context.stroke();
+      context.restore();
+    }
 
     context.save();
     context.scale(1, wingBeat);
-    context.fillStyle = "rgba(240, 237, 224, 0.72)";
-    context.strokeStyle = "rgba(84, 73, 61, 0.48)";
-    context.lineWidth = 1;
+    context.fillStyle = "rgba(244, 240, 226, 0.76)";
+    context.strokeStyle = "rgba(99, 83, 66, 0.35)";
+    context.lineWidth = 0.8;
     context.beginPath();
-    context.ellipse(-bee.size * 0.08, -bee.size * 0.42, bee.size * 0.52, bee.size * 0.23, -0.35, 0, Math.PI * 2);
+    context.ellipse(-bee.size * 0.07, -bee.size * 0.38, bee.size * 0.4, bee.size * 0.27, -0.42, 0, Math.PI * 2);
     context.fill();
     context.stroke();
     context.beginPath();
-    context.ellipse(-bee.size * 0.08, bee.size * 0.42, bee.size * 0.52, bee.size * 0.23, 0.35, 0, Math.PI * 2);
+    context.ellipse(-bee.size * 0.07, bee.size * 0.38, bee.size * 0.4, bee.size * 0.27, 0.42, 0, Math.PI * 2);
     context.fill();
     context.stroke();
     context.restore();
 
     context.save();
     context.beginPath();
-    context.ellipse(0, 0, bee.size * 0.76, bee.size * 0.36, 0, 0, Math.PI * 2);
+    context.ellipse(0, 0, bee.size * 0.58, bee.size * 0.4, 0, 0, Math.PI * 2);
     context.clip();
     context.fillStyle = `rgb(${gold[0]}, ${gold[1]}, ${gold[2]})`;
     context.fillRect(-bee.size, -bee.size, bee.size * 2, bee.size * 2);
     context.fillStyle = `rgb(${dark[0]}, ${dark[1]}, ${dark[2]})`;
-    [-0.35, 0.02, 0.39].forEach((position) => {
-      context.fillRect(bee.size * position, -bee.size * 0.5, bee.size * 0.16, bee.size);
+    [-0.22, 0.17].forEach((position) => {
+      context.fillRect(bee.size * position, -bee.size * 0.5, bee.size * 0.13, bee.size);
     });
     context.restore();
 
     context.beginPath();
-    context.ellipse(0, 0, bee.size * 0.76, bee.size * 0.36, 0, 0, Math.PI * 2);
-    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.9)`;
-    context.lineWidth = 1.2;
+    context.ellipse(0, 0, bee.size * 0.58, bee.size * 0.4, 0, 0, Math.PI * 2);
+    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.72)`;
+    context.lineWidth = 0.9;
     context.stroke();
 
     context.beginPath();
-    context.arc(bee.size * 0.67, 0, bee.size * 0.28, 0, Math.PI * 2);
+    context.arc(bee.size * 0.5, 0, bee.size * 0.3, 0, Math.PI * 2);
     context.fillStyle = `rgb(${dark[0]}, ${dark[1]}, ${dark[2]})`;
     context.fill();
 
+    context.fillStyle = "rgba(246, 239, 218, 0.88)";
     context.beginPath();
-    context.moveTo(-bee.size * 0.76, 0);
-    context.lineTo(-bee.size * 1.02, -bee.size * 0.13);
-    context.lineTo(-bee.size * 1.02, bee.size * 0.13);
-    context.closePath();
+    context.arc(bee.size * 0.61, -bee.size * 0.09, bee.size * 0.055, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.arc(bee.size * 0.61, bee.size * 0.09, bee.size * 0.055, 0, Math.PI * 2);
     context.fill();
 
-    context.lineWidth = 1.1;
+    context.strokeStyle = `rgba(${dark[0]}, ${dark[1]}, ${dark[2]}, 0.75)`;
+    context.lineWidth = 0.8;
     context.beginPath();
-    context.moveTo(bee.size * 0.78, -bee.size * 0.12);
-    context.quadraticCurveTo(bee.size, -bee.size * 0.48, bee.size * 1.18, -bee.size * 0.4);
-    context.moveTo(bee.size * 0.78, bee.size * 0.12);
-    context.quadraticCurveTo(bee.size, bee.size * 0.48, bee.size * 1.18, bee.size * 0.4);
+    context.moveTo(bee.size * 0.62, -bee.size * 0.18);
+    context.quadraticCurveTo(bee.size * 0.77, -bee.size * 0.43, bee.size * 0.94, -bee.size * 0.38);
+    context.moveTo(bee.size * 0.62, bee.size * 0.18);
+    context.quadraticCurveTo(bee.size * 0.77, bee.size * 0.43, bee.size * 0.94, bee.size * 0.38);
     context.stroke();
     context.restore();
   }
@@ -254,28 +257,14 @@ if (canvas && drawingArea) {
     [[0.1, 0.25], [0.22, 0.78], [0.75, 0.82], [0.9, 0.35]].forEach(([x, y], index) => {
       createFlower(width * x, height * y, index * 60);
     });
-    [[0.32, 0.25], [0.72, 0.2], [0.91, 0.6]].forEach(([x, y], index) => {
-      createBee(width * x, height * y, 260 + index * 90);
-    });
+    createBee(width * 0.31, height * 0.24, 260, true);
+    createBee(width * 0.88, height * 0.58, 360, false);
   }
 
   function addSelectedItem(x, y) {
-    if (activeMode === "bee") createBee(x, y);
+    tapCount += 1;
+    if (tapCount % 3 === 0) createBee(x, y);
     else createFlower(x, y);
-  }
-
-  function setMode(mode) {
-    activeMode = mode;
-    modeButtons.forEach((button) => {
-      const isActive = button.dataset.gardenMode === mode;
-      button.classList.toggle("active", isActive);
-      button.setAttribute("aria-pressed", String(isActive));
-    });
-    if (gardenInstruction) {
-      gardenInstruction.textContent = mode === "bee"
-        ? "Tap the background to add a flying bee."
-        : "Tap the background to grow a flower.";
-    }
   }
 
   drawingArea.addEventListener("pointerdown", (event) => {
@@ -292,11 +281,8 @@ if (canvas && drawingArea) {
 
   clearButton?.addEventListener("click", () => {
     gardenItems.length = 0;
+    tapCount = 0;
     draw();
-  });
-
-  modeButtons.forEach((button) => {
-    button.addEventListener("click", () => setMode(button.dataset.gardenMode));
   });
 
   window.addEventListener("resize", resizeCanvas);
