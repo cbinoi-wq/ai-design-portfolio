@@ -273,14 +273,16 @@ a { -webkit-tap-highlight-color: transparent; }
 
 .project-list {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   max-width: 1180px;
   margin: 0 auto;
-  gap: 55px;
+  gap: clamp(22px, 3vw, 36px);
 }
 
 .project-card {
   display: grid;
-  grid-template-columns: minmax(280px, 1.22fr) minmax(260px, 0.78fr);
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
   overflow: hidden;
   border-radius: 28px;
   color: var(--cream);
@@ -288,14 +290,15 @@ a { -webkit-tap-highlight-color: transparent; }
   box-shadow: 0 22px 55px rgba(35, 25, 19, 0.13);
 }
 
-.project-card:nth-child(even) { grid-template-columns: minmax(260px, 0.78fr) minmax(280px, 1.22fr); }
-.project-card:nth-child(even) .card-image { order: 2; }
+.project-card:nth-child(even) { grid-template-columns: 1fr; }
+.project-card:nth-child(even) .card-image { order: initial; }
 
 .album-card { background: #1b1113; }
 .environment-card { background: #2d3b2e; }
 
 .card-image {
-  min-height: 520px;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: #111;
 }
@@ -314,10 +317,10 @@ a { -webkit-tap-highlight-color: transparent; }
 .card-copy {
   position: relative;
   display: flex;
-  min-height: 520px;
+  min-height: 330px;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(34px, 5vw, 74px);
+  padding: clamp(34px, 4vw, 54px);
 }
 
 .project-number {
@@ -341,7 +344,7 @@ a { -webkit-tap-highlight-color: transparent; }
 .card-copy h3 {
   margin: 0 0 22px;
   font-family: var(--serif);
-  font-size: clamp(39px, 5vw, 66px);
+  font-size: clamp(36px, 4vw, 54px);
   font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 0.98;
@@ -772,6 +775,7 @@ a { -webkit-tap-highlight-color: transparent; }
   .section-heading,
   .about-strip { grid-template-columns: 1fr; gap: 16px; }
   .projects-section { padding-inline: 17px; }
+  .project-list { grid-template-columns: 1fr; }
   .card-image { aspect-ratio: 1; }
   .card-copy { padding: 65px 27px 42px; }
   .about-strip { margin-inline: 22px; }
