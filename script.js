@@ -74,7 +74,8 @@ if (canvas && drawingArea) {
       x,
       y,
       size: randomBetween(8, 12),
-      rotation: randomBetween(-Math.PI, Math.PI),
+      rotation: randomBetween(-0.4, 0.4),
+      direction: Math.random() > 0.5 ? 1 : -1,
       colors,
       hasTrail,
       born: performance.now() + delay
@@ -154,6 +155,7 @@ if (canvas && drawingArea) {
     context.save();
     context.translate(bee.x, bee.y);
     context.rotate(bee.rotation);
+    context.scale(bee.direction, 1);
     context.scale(eased, eased);
     context.globalAlpha = 0.68 * eased;
 
@@ -258,7 +260,7 @@ if (canvas && drawingArea) {
 
   function addSelectedItem(x, y) {
     tapCount += 1;
-    if (tapCount % 6 === 0) createBee(x, y);
+    if (tapCount % 4 === 0) createBee(x, y);
     else createFlower(x, y);
   }
 
