@@ -466,11 +466,15 @@ if (canvas && drawingArea) {
   }
 
   function seedGarden() {
-    [[0.1, 0.25], [0.22, 0.78], [0.75, 0.82], [0.9, 0.35]].forEach(([x, y], index) => {
+    const isPhone = width <= 620;
+    const flowerPositions = isPhone
+      ? [[0.16, 0.67], [0.78, 0.7], [0.24, 0.84], [0.74, 0.88]]
+      : [[0.1, 0.25], [0.22, 0.78], [0.75, 0.82], [0.9, 0.35]];
+    flowerPositions.forEach(([x, y], index) => {
       createFlower(width * x, height * y, index * 60);
     });
-    createBee(width * 0.31, height * 0.24, 260, true, 1);
-    createBee(width * 0.88, height * 0.58, 360, false, -1);
+    createBee(width * (isPhone ? 0.18 : 0.31), height * (isPhone ? 0.76 : 0.24), 260, true, 1);
+    createBee(width * (isPhone ? 0.82 : 0.88), height * (isPhone ? 0.8 : 0.58), 360, false, -1);
   }
 
   function addSelectedItem(x, y) {
