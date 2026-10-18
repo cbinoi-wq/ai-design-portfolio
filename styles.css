@@ -725,9 +725,12 @@ a { -webkit-tap-highlight-color: transparent; }
 }
 
 .final-environment > img {
-  max-width: 1400px;
+  width: auto;
+  max-width: min(1180px, 100%);
+  max-height: clamp(320px, 58vh, 620px);
   margin: 0 auto;
-  border-radius: 4px;
+  object-fit: contain;
+  border-radius: 14px;
   box-shadow: 0 30px 80px rgba(0,0,0,0.24);
 }
 
