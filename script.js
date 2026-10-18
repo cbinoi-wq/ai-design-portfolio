@@ -18,12 +18,10 @@ if (canvas && drawingArea) {
     [224, 139, 107],
     [235, 218, 173]
   ];
-  const butterflyPalette = [
-    [[208, 105, 137], [237, 170, 180], [112, 52, 72]],
-    [[102, 145, 183], [174, 192, 211], [62, 80, 105]],
-    [[221, 155, 80], [241, 194, 113], [120, 73, 49]],
-    [[148, 161, 116], [208, 184, 171], [75, 84, 65]],
-    [[153, 127, 181], [211, 172, 196], [83, 63, 101]]
+  const beePalette = [
+    [[199, 151, 65], [76, 62, 47]],
+    [[216, 174, 90], [89, 69, 49]],
+    [[187, 137, 56], [70, 61, 50]]
   ];
   let width = 0;
   let height = 0;
@@ -88,18 +86,17 @@ if (canvas && drawingArea) {
     startAnimation();
   }
 
-  function createButterfly(x, y, delay = 0, hasTrail = Math.random() < 0.34) {
-    const colors = butterflyPalette[Math.floor(Math.random() * butterflyPalette.length)];
+  function createBee(x, y, delay = 0, hasTrail = Math.random() < 0.35) {
+    const colors = beePalette[Math.floor(Math.random() * beePalette.length)];
     gardenItems.push({
-      type: "butterfly",
+      type: "bee",
       x,
       y,
-      size: randomBetween(16, 23),
-      rotation: randomBetween(-0.62, 0.62),
+      size: randomBetween(8, 12),
+      rotation: randomBetween(-0.4, 0.4),
       direction: Math.random() > 0.5 ? 1 : -1,
       colors,
       hasTrail,
-      hasSparkles: Math.random() < 0.22,
       born: performance.now() + delay
     });
     if (gardenItems.length > 80) gardenItems.splice(0, gardenItems.length - 80);
@@ -443,7 +440,7 @@ if (canvas && drawingArea) {
   function draw(now = performance.now()) {
     context.clearRect(0, 0, width, height);
     gardenItems.forEach((item) => {
-      if (item.type === "butterfly") drawButterfly(item, now);
+      if (item.type === "bee") drawBee(item, now);
       else drawFlower(item, now);
     });
     const growing = gardenItems.some((item) => now - item.born < 650);
@@ -462,13 +459,13 @@ if (canvas && drawingArea) {
     [[0.1, 0.25], [0.22, 0.78], [0.75, 0.82], [0.9, 0.35]].forEach(([x, y], index) => {
       createFlower(width * x, height * y, index * 60);
     });
-    createButterfly(width * 0.31, height * 0.24, 260, true);
-    createButterfly(width * 0.88, height * 0.58, 360, false);
+    createBee(width * 0.31, height * 0.24, 260, true);
+    createBee(width * 0.88, height * 0.58, 360, false);
   }
 
   function addSelectedItem(x, y) {
     tapCount += 1;
-    if (tapCount % 4 === 0) createButterfly(x, y);
+    if (tapCount % 4 === 0) createBee(x, y);
     else createFlower(x, y);
   }
 
