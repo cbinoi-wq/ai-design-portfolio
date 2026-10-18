@@ -28,6 +28,8 @@ if (canvas && drawingArea) {
   let pixelRatio = 1;
   let animationFrame = 0;
   let tapCount = 0;
+  let flowerSequence = 0;
+  let beeSequence = 0;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function resizeCanvas() {
@@ -48,6 +50,7 @@ if (canvas && drawingArea) {
   }
 
   function createFlower(x, y, delay = 0) {
+    flowerSequence += 1;
     const color = palette[Math.floor(Math.random() * palette.length)];
     const kind = ["blossom", "daisy", "ruffled"][Math.floor(Math.random() * 3)];
     const petals = kind === "daisy"
@@ -74,6 +77,8 @@ if (canvas && drawingArea) {
       born: performance.now() + delay,
       stem: randomBetween(45, 120),
       lean: randomBetween(-18, 18),
+      hasStem: flowerSequence % 3 !== 0,
+      hasLeaf: flowerSequence % 3 !== 0 && flowerSequence % 2 === 0,
       leafSide: Math.random() > 0.5 ? 1 : -1,
       petalVariation: Array.from({ length: petals }, () => ({
         scale: randomBetween(0.86, 1.08),
@@ -86,15 +91,16 @@ if (canvas && drawingArea) {
     startAnimation();
   }
 
-  function createBee(x, y, delay = 0, hasTrail = Math.random() < 0.35) {
+  function createBee(x, y, delay = 0, hasTrail = Math.random() < 0.35, preferredDirection = null) {
+    beeSequence += 1;
     const colors = beePalette[Math.floor(Math.random() * beePalette.length)];
     gardenItems.push({
       type: "bee",
       x,
       y,
       size: randomBetween(8, 12),
-      rotation: randomBetween(-0.4, 0.4),
-      direction: Math.random() > 0.5 ? 1 : -1,
+      rotation: randomBetween(-0.48, 0.48),
+      direction: preferredDirection ?? (beeSequence % 2 === 0 ? -1 : 1),
       colors,
       hasTrail,
       born: performance.now() + delay
@@ -135,28 +141,32 @@ if (canvas && drawingArea) {
     context.translate(flower.x, flower.y);
     context.globalAlpha = 0.88 * eased;
     context.lineCap = "round";
-    context.strokeStyle = "rgba(54, 80, 52, 0.5)";
-    context.lineWidth = Math.max(1.3, flower.size * 0.055);
-    context.beginPath();
-    context.moveTo(0, flower.size * 0.15);
-    context.quadraticCurveTo(flower.lean, flower.stem * 0.55, flower.lean * 0.55, flower.stem);
-    context.stroke();
+    if (flower.hasStem) {
+      context.strokeStyle = "rgba(54, 80, 52, 0.5)";
+      context.lineWidth = Math.max(1.3, flower.size * 0.055);
+      context.beginPath();
+      context.moveTo(0, flower.size * 0.15);
+      context.quadraticCurveTo(flower.lean, flower.stem * 0.55, flower.lean * 0.55, flower.stem);
+      context.stroke();
 
-    const leafY = flower.stem * 0.58;
-    const leafX = flower.lean * 0.34;
-    context.save();
-    context.translate(leafX, leafY);
-    context.scale(flower.leafSide, 1);
-    context.beginPath();
-    context.moveTo(0, 0);
-    context.bezierCurveTo(8, -12, 22, -11, 25, -4);
-    context.bezierCurveTo(17, 2, 8, 5, 0, 0);
-    context.fillStyle = "rgba(91, 119, 83, 0.27)";
-    context.strokeStyle = "rgba(54, 80, 52, 0.32)";
-    context.lineWidth = 0.8;
-    context.fill();
-    context.stroke();
-    context.restore();
+      if (flower.hasLeaf) {
+        const leafY = flower.stem * 0.58;
+        const leafX = flower.lean * 0.34;
+        context.save();
+        context.translate(leafX, leafY);
+        context.scale(flower.leafSide, 1);
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.bezierCurveTo(8, -12, 22, -11, 25, -4);
+        context.bezierCurveTo(17, 2, 8, 5, 0, 0);
+        context.fillStyle = "rgba(91, 119, 83, 0.27)";
+        context.strokeStyle = "rgba(54, 80, 52, 0.32)";
+        context.lineWidth = 0.8;
+        context.fill();
+        context.stroke();
+        context.restore();
+      }
+    }
 
     context.rotate(flower.rotation);
     context.scale(eased, eased);
@@ -459,8 +469,8 @@ if (canvas && drawingArea) {
     [[0.1, 0.25], [0.22, 0.78], [0.75, 0.82], [0.9, 0.35]].forEach(([x, y], index) => {
       createFlower(width * x, height * y, index * 60);
     });
-    createBee(width * 0.31, height * 0.24, 260, true);
-    createBee(width * 0.88, height * 0.58, 360, false);
+    createBee(width * 0.31, height * 0.24, 260, true, 1);
+    createBee(width * 0.88, height * 0.58, 360, false, -1);
   }
 
   function addSelectedItem(x, y) {
@@ -484,6 +494,8 @@ if (canvas && drawingArea) {
   clearButton?.addEventListener("click", () => {
     gardenItems.length = 0;
     tapCount = 0;
+    flowerSequence = 0;
+    beeSequence = 0;
     draw();
   });
 
