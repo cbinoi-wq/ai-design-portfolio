@@ -377,6 +377,79 @@ a { -webkit-tap-highlight-color: transparent; }
   font-size: 13px;
 }
 
+.proposal-teaser {
+  position: relative;
+  display: grid;
+  max-width: 1180px;
+  min-height: 310px;
+  margin: 0 auto clamp(85px, 10vw, 150px);
+  padding: clamp(35px, 5vw, 65px);
+  overflow: hidden;
+  color: var(--paper);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 84% 24%, rgba(92,168,170,0.38), transparent 24%),
+    radial-gradient(circle at 72% 78%, rgba(169,47,57,0.48), transparent 27%),
+    #171919;
+  text-decoration: none;
+  box-shadow: 0 22px 55px rgba(35, 25, 19, 0.13);
+}
+
+.proposal-teaser::after {
+  position: absolute;
+  right: 8%;
+  bottom: -32%;
+  width: 270px;
+  height: 270px;
+  border: 30px solid rgba(243,238,230,0.12);
+  border-radius: 50%;
+  content: "";
+}
+
+.proposal-teaser-label {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.proposal-teaser strong {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin-top: 25px;
+  font: 400 clamp(52px, 8vw, 105px)/0.8 var(--serif);
+  letter-spacing: -0.06em;
+}
+
+.proposal-teaser strong em {
+  color: #a92f39;
+  font-weight: 400;
+  text-shadow: -2px 0 #5ca8aa;
+}
+
+.proposal-teaser-copy {
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+  color: rgba(243,238,230,0.68);
+  font-family: var(--serif);
+  font-size: 21px;
+}
+
+.proposal-teaser-link {
+  position: absolute;
+  right: clamp(30px, 5vw, 65px);
+  bottom: clamp(30px, 5vw, 65px);
+  z-index: 1;
+  padding-bottom: 3px;
+  border-bottom: 1px solid currentColor;
+  font-size: 12px;
+  font-weight: 750;
+}
+
 .about-strip {
   display: grid;
   grid-template-columns: minmax(150px, 0.35fr) 1fr;
@@ -795,6 +868,8 @@ a { -webkit-tap-highlight-color: transparent; }
   .section-heading,
   .about-strip { grid-template-columns: 1fr; gap: 16px; }
   .projects-section { padding-inline: 17px; }
+  .proposal-teaser { margin-inline: 17px; padding-bottom: 105px; }
+  .proposal-teaser-link { right: auto; left: 35px; }
   .project-list { grid-template-columns: 1fr; }
   .card-image { aspect-ratio: 1; }
   .card-copy { padding: 65px 27px 42px; }

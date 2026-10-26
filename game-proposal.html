@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Swallow the Static — Criss Binoi's game proposal about hallucination, stress, and making a noisy world quiet.">
+  <title>Swallow the Static — Game Proposal · Criss Binoi</title>
+  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="game-proposal.css?v=2">
+  <script src="script.js?v=13" defer></script>
+  <script src="game-proposal.js?v=2" defer></script>
+</head>
+<body class="proposal-page" data-page="proposal">
+  <header class="site-header proposal-header" id="top">
+    <a class="brand" href="index.html" aria-label="Criss Binoi portfolio home"><span>CB</span><small>AI Design Portfolio</small></a>
+    <nav aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="album-cover.html">Album Cover</a>
+      <a href="greenhouse-sanctuary.html">3D Environment</a>
+      <a class="active" href="game-proposal.html">Game Proposal</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="proposal-hero" aria-labelledby="proposal-title">
+      <div class="proposal-hero-copy">
+        <p class="proposal-kicker">Hallucination · Web game proposal · Week 01</p>
+        <h1 id="proposal-title">SWALLOW<br><em>THE STATIC.</em></h1>
+        <p class="proposal-tagline">A tiny void eats the thoughts that will not leave you alone.</p>
+        <p class="proposal-lede">Guide a small hole through a city made from anxious thoughts. Swallow visual noise, grow larger, and watch reality bend. Some objects are solid, some are hallucinated echoes, and one memory should remain.</p>
+        <div class="proposal-actions">
+          <a class="proposal-button solid" href="#journey">Follow the player journey</a>
+          <a class="proposal-button" href="#case-study">See the Hole.io study</a>
+        </div>
+        <dl class="proposal-meta">
+          <div><dt>Format</dt><dd>Short 2D browser game</dd></div>
+          <div><dt>Input</dt><dd>Move, click, or drag</dd></div>
+          <div><dt>Play time</dt><dd>3–5 minutes</dd></div>
+        </dl>
+      </div>
+
+      <div class="room-poster swallow-poster" id="swallow-poster" aria-label="Interactive concept visual for Swallow the Static">
+        <div class="demo-topline">
+          <p class="room-status" id="demo-status" aria-live="polite">NOISE 100% · HOLE SIZE 01</p>
+          <button class="demo-reset" id="demo-reset" type="button">Reset</button>
+        </div>
+        <div class="swallow-demo" id="swallow-demo">
+          <span class="demo-road road-one" aria-hidden="true"></span><span class="demo-road road-two" aria-hidden="true"></span><span class="demo-orbit" aria-hidden="true"></span>
+          <button class="demo-object object-paper edible-one" style="--x:13%;--y:22%" data-size="1" aria-label="Swallow a paper note"><span>!</span></button>
+          <button class="demo-object object-cup edible-one" style="--x:70%;--y:18%" data-size="1" aria-label="Swallow a coffee cup"></button>
+          <button class="demo-object object-phone edible-one" style="--x:28%;--y:71%" data-size="1" aria-label="Swallow a notification"></button>
+          <button class="demo-object object-lamp edible-one" style="--x:84%;--y:61%" data-size="1" aria-label="Swallow a lamp"></button>
+          <button class="demo-object object-car edible-two" style="--x:54%;--y:33%" data-size="2" aria-label="Swallow a car"></button>
+          <button class="demo-object object-tree edible-two" style="--x:18%;--y:48%" data-size="2" aria-label="Swallow a tree"></button>
+          <button class="demo-object object-house edible-two" style="--x:72%;--y:77%" data-size="2" aria-label="Swallow a small house"></button>
+          <button class="demo-object object-tower edible-three" style="--x:43%;--y:13%" data-size="3" aria-label="Swallow a tower"></button>
+          <button class="demo-object object-memory" style="--x:48%;--y:72%" data-size="9" aria-label="A memory that cannot be swallowed"><span>✦</span></button>
+          <span class="demo-hole" id="demo-hole" aria-hidden="true"><i></i></span>
+          <p class="demo-message" id="demo-message">Start with the smallest objects.</p>
+        </div>
+        <p class="room-hint">Try the concept: tap an object. The hole can only swallow things smaller than itself.</p>
+      </div>
+    </section>
+
+    <nav class="proposal-index" aria-label="Proposal sections">
+      <a href="#introduction"><span>01</span>Game</a><a href="#case-study"><span>02</span>Research</a><a href="#ai-discussion"><span>03</span>AI discussion</a><a href="#concept"><span>04</span>Narrative</a><a href="#journey"><span>05</span>Journey</a><a href="#style"><span>06</span>Style + sound</a><a href="#build-plan"><span>07</span>Build plan</a>
+    </nav>
+
+    <section class="proposal-section intro-section" id="introduction" aria-labelledby="introduction-title">
+      <div class="section-number">01</div>
+      <div class="proposal-heading"><p class="proposal-kicker">Introduce the game</p><h2 id="introduction-title">The louder the world becomes, the more you can swallow.</h2></div>
+      <div class="intro-grid">
+        <p class="large-copy">In <em>Swallow the Static</em>, hallucination is the way stress can make ordinary things feel louder, larger, and impossible to ignore.</p>
+        <div class="body-copy">
+          <p>The player controls a small circular void in a dreamlike city. Moving across objects consumes them if they are small enough. Each object makes the void grow, but it also causes the city to duplicate, tilt, and invent new objects.</p>
+          <p>The main interaction stays simple across three stages: move, swallow, grow. The emotional goal is not destruction for its own sake. It is the satisfying feeling of clearing a crowded space until only one calm memory remains.</p>
+        </div>
+      </div>
+      <div class="experience-strip" aria-label="Intended player experience">
+        <article><span>01</span><strong>Release</strong><p>Small objects disappear with soft, satisfying feedback.</p></article>
+        <article><span>02</span><strong>Power</strong><p>The growing hole can consume what blocked it before.</p></article>
+        <article><span>03</span><strong>Doubt</strong><p>Copied objects and false shadows make reality unreliable.</p></article>
+        <article><span>04</span><strong>Quiet</strong><p>The player chooses what to keep instead of eating everything.</p></article>
+      </div>
+    </section>
+
+    <section class="proposal-section dark-section" id="case-study" aria-labelledby="case-study-title">
+      <div class="section-number">02</div>
+      <div class="proposal-heading">
+        <p class="proposal-kicker">Case study · Browser arcade game</p>
+        <h2 id="case-study-title"><em>Hole.io</em></h2>
+        <p class="heading-note">Created and published by Voodoo · Original release 2018 · Browser version on Poki</p>
+      </div>
+      <div class="case-intro">
+        <div class="case-mark hole-case-art" aria-hidden="true">
+          <span class="case-building building-a"></span><span class="case-building building-b"></span><span class="case-building building-c"></span><span class="case-hole"><i></i></span><span class="case-car"></span><b>SWALLOW · GROW · REPEAT</b>
+        </div>
+        <div>
+          <p class="large-copy">I chose <em>Hole.io</em> because it is simple, playful, and surprisingly calming when I feel stressed or angry.</p>
+          <blockquote class="personal-note">“It helps when I want to break everything. I can swallow everything, but inside a game.”</blockquote>
+          <p>The player steers a hole through a bright city, beginning with tiny objects and growing large enough to swallow cars and buildings. Voodoo describes the game as satisfying and relaxing, while its design team focuses closely on suction, movement, friction, bounce, and camera easing. My experience helped me notice that destruction can feel like clearing clutter rather than acting violently.</p>
+          <div class="source-links">
+            <a href="https://poki.com/en/g/hole-io" target="_blank" rel="noreferrer">Play the browser game ↗</a>
+            <a href="https://voodoo.io/hole" target="_blank" rel="noreferrer">Official Voodoo page ↗</a>
+            <a href="https://play.google.com/store/apps/details?id=io.voodoo.holeio" target="_blank" rel="noreferrer">Official store description ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="subheading">Three moments that changed my understanding</h3>
+      <div class="moment-grid">
+        <article class="moment-card">
+          <div class="moment-visual moment-tiny" aria-hidden="true"><span class="study-hole"></span><i class="study-cone"></i><b>START SMALL</b></div>
+          <p class="card-label">Moment 01 · Learning scale</p><h4>A traffic cone becomes progress.</h4>
+          <p>At first, most of the city blocks the hole. Swallowing a tiny object teaches the rule immediately: I do not need a long tutorial; I need to compare sizes and keep moving.</p><p class="evidence-tag">My play observation</p>
+        </article>
+        <article class="moment-card">
+          <div class="moment-visual moment-threshold" aria-hidden="true"><span class="study-hole"></span><i class="study-car"></i><b>NOW IT FITS</b></div>
+          <p class="card-label">Moment 02 · Growth changes meaning</p><h4>The obstacle becomes the reward.</h4>
+          <p>A car that stopped me earlier eventually fits into the hole. The same object changes from barrier to target, making growth visible without needing a number.</p><p class="evidence-tag">My observation + official description</p>
+        </article>
+        <article class="moment-card">
+          <div class="moment-visual moment-release" aria-hidden="true"><span class="study-hole"></span><i class="study-tower"></i><b>CLEAR THE CITY</b></div>
+          <p class="card-label">Moment 03 · Destruction feels like relief</p><h4>A whole building disappears.</h4>
+          <p>Swallowing a large building should look aggressive, but the smooth movement and instant clearing feel satisfying to me. This is the moment I understood why I return to the game when I am stressed.</p><p class="evidence-tag">My interpretation + Voodoo source</p>
+        </article>
+      </div>
+
+      <div class="event-study">
+        <div class="table-heading"><div><p class="proposal-kicker">Action analysis</p><h3>Six events connect movement, feedback, and emotion.</h3></div><p>The core action never changes, but the objects that can be swallowed expand. That simple progression creates a strong “one more object” rhythm.</p></div>
+        <div class="event-table" role="table" aria-label="Six player action events in Hole.io">
+          <div class="event-row event-head" role="row"><span>Player action</span><span>Game response</span><span>Player understanding</span></div>
+          <div class="event-row" role="row"><span data-label="Player action">Steer under a tiny object.</span><span data-label="Game response">The object drops, disappears, and adds growth.</span><span data-label="Understanding">Anything smaller than the hole can be eaten.</span></div>
+          <div class="event-row" role="row"><span data-label="Player action">Move toward something too large.</span><span data-label="Game response">It stays in place and blocks the route.</span><span data-label="Understanding">Size is both the rule and the goal.</span></div>
+          <div class="event-row" role="row"><span data-label="Player action">Circle through a cluster of small objects.</span><span data-label="Game response">Several quick drops create a smooth chain.</span><span data-label="Understanding">Choosing a route makes growth faster and more satisfying.</span></div>
+          <div class="event-row" role="row"><span data-label="Player action">Return to a car after growing.</span><span data-label="Game response">The car now bends and falls into the hole.</span><span data-label="Understanding">Growth changes which parts of the world are possible.</span></div>
+          <div class="event-row" role="row"><span data-label="Player action">Approach a larger rival hole.</span><span data-label="Game response">The larger hole becomes a threat.</span><span data-label="Understanding">Scale creates risk as well as power.</span></div>
+          <div class="event-row" role="row"><span data-label="Player action">Swallow a building.</span><span data-label="Game response">The city clears with large motion and impact feedback.</span><span data-label="Understanding">The original obstacle has become a cathartic release.</span></div>
+        </div>
+      </div>
+      <div class="lesson-callout"><p class="proposal-kicker">What I learned</p><p>A satisfying interaction can communicate more than a complicated story. <em>Hole.io</em> uses scale, motion, and sound to turn one action into a complete loop. <em>Swallow the Static</em> keeps that clarity, but removes the leaderboard and uses growth to move from stress to quiet.</p></div>
+    </section>
+
+    <section class="proposal-section ai-section" id="ai-discussion" aria-labelledby="ai-title">
+      <div class="section-number">03</div>
+      <div class="proposal-heading"><p class="proposal-kicker">Critical discussion with AI</p><h2 id="ai-title">AI saw competition. I felt calm.</h2></div>
+      <div class="research-check">
+        <article>
+          <p class="card-label">Verified research</p><h3>What the sources support</h3>
+          <ul>
+            <li>Voodoo is the credited developer and publisher of <em>Hole.io</em>.</li>
+            <li>The core loop is steering a hole, swallowing smaller objects, and growing large enough to consume buildings.</li>
+            <li>Voodoo’s store text calls the experience simple, satisfying, relaxing, and suitable for short breaks.</li>
+            <li>Voodoo’s design listing names friction, bounce, suction force, camera motion, and easing as important parts of the game feel.</li>
+            <li>The current game supports both single-player and competitive multiplayer modes.</li>
+          </ul>
+        </article>
+        <article>
+          <p class="card-label">Two gaps I identified</p><h3>What the first AI reading missed</h3>
+          <ol>
+            <li><strong>Destruction is not always experienced as aggression.</strong> AI described a power fantasy, but I experience the disappearing clutter as emotional release. Voodoo’s own description also calls the game oddly relaxing.</li>
+            <li><strong>Growth is not satisfying only because of points.</strong> The physical timing—the wobble, drop, suction, and sound—makes each object feel good to consume even before I check a score.</li>
+          </ol>
+        </article>
+      </div>
+      <div class="exchange" aria-label="Selected exchange with AI">
+        <div class="exchange-line ai-line"><span>AI · First reading</span><p>“Hole.io is mainly a competitive power fantasy: the player destroys the city to become larger than opponents.”</p></div>
+        <div class="exchange-line user-line"><span>My challenge</span><p>“That misses why I play. When I am stressed or angry, swallowing everything calms me down. Does the motion and disappearance make destruction feel more like clearing clutter?”</p></div>
+        <div class="exchange-line ai-line revised"><span>AI · Revised reading</span><p>“Yes. Competition explains the goal, but not the whole sensation. Smooth steering, visible growth, repeated suction, and an increasingly empty space can create order and release. The same mechanic can feel destructive and soothing at once.”</p></div>
+      </div>
+      <div class="decision-grid">
+        <div><p class="proposal-kicker">My conclusion</p><p class="large-copy">The pleasure comes from making visual noise disappear.</p></div>
+        <div class="body-copy"><p>AI helped me separate the game’s competitive goal from my own emotional experience. The contradiction—destruction that feels calming—is more interesting than simply copying the original score system.</p><p><strong>Design decision:</strong> my game will have no rivals, combat, or public leaderboard. The hole grows through soft, responsive motion while the world becomes quieter. The final stage asks the player to keep one memory instead of swallowing absolutely everything.</p></div>
+      </div>
+    </section>
+
+    <section class="proposal-section concept-section" id="concept" aria-labelledby="concept-title">
+      <div class="section-number">04</div>
+      <div class="proposal-heading"><p class="proposal-kicker">Narrative and concept</p><h2 id="concept-title">Hallucination as stress made visible.</h2></div>
+      <div class="concept-statement"><p>My interpretation of <strong>Hallucination</strong> is a world where anxious thoughts become physical. A notification grows into a tower. One cup becomes five. Shadows detach from objects. The city is not objectively real; it is how an overwhelmed mind experiences it.</p></div>
+      <div class="concept-grid">
+        <article><span>World</span><h3>A soft city built from everyday mental clutter.</h3><p>Phones, clocks, unfinished notes, cups, cars, and buildings float on a calm grid. Stress duplicates them and bends the streets into impossible loops.</p></article>
+        <article><span>Player role</span><h3>A small quiet space inside the noise.</h3><p>The player is not a hero or monster. They control an empty circle that can make crowded thoughts disappear and create room to breathe.</p></article>
+        <article><span>Main interaction</span><h3>Steer toward smaller objects to swallow them.</h3><p>The cursor, finger, or arrow keys guide the void. Consumed objects add size. Hallucinated copies flicker and give no growth, teaching the player to notice what is solid.</p></article>
+        <article><span>Desired experience</span><h3>Cathartic, strange, and gently reflective.</h3><p>The first two stages should feel immediately satisfying. The last stage slows down and asks whether making space must mean erasing everything.</p></article>
+      </div>
+      <div class="narrative-premise"><p class="proposal-kicker">Short narrative premise</p><blockquote>A city forms from everything you tried not to think about. Become the quiet space inside it. Swallow the static, notice what is false, and leave one thing worth remembering.</blockquote></div>
+      <p class="wellbeing-note"><strong>Framing note:</strong> this is an artistic game about a personal feeling. It is not presented as therapy or as a treatment for stress or anger.</p>
+    </section>
+
+    <section class="proposal-section journey-section" id="journey" aria-labelledby="journey-title">
+      <div class="section-number">05</div>
+      <div class="proposal-heading"><p class="proposal-kicker">Interaction and player journey</p><h2 id="journey-title">One movement develops through five beats.</h2></div>
+      <div class="journey-flow" aria-label="Game flowchart">
+        <article><span>Opening</span><strong>Listen</strong><p>The noisy city appears around a tiny void.</p></article><i aria-hidden="true">→</i>
+        <article><span>Stage 01</span><strong>Release</strong><p>Swallow small clutter and learn the size rule.</p></article><i aria-hidden="true">→</i>
+        <article><span>Stage 02</span><strong>Grow</strong><p>Return to objects that were too large before.</p></article><i aria-hidden="true">→</i>
+        <article><span>Stage 03</span><strong>Notice</strong><p>Ignore false copies and protect one memory.</p></article><i aria-hidden="true">→</i>
+        <article><span>Ending</span><strong>Breathe</strong><p>The hole becomes a moon above a quiet city.</p></article>
+      </div>
+      <div class="storyboard-heading"><div><p class="proposal-kicker">Storyboard</p><h3>Five frames show goal, input, feedback, and continuation.</h3></div><p>The game uses one compact top-down scene. New behavior, scale, and sound create the three stages, keeping the two-week build realistic.</p></div>
+      <div class="storyboard-grid">
+        <article class="story-frame">
+          <div class="frame-art frame-static-opening" aria-hidden="true"><span class="frame-hole"></span><i></i><b>TOO LOUD?</b></div>
+          <span class="frame-number">01 · OPENING</span><h4>Listen</h4>
+          <dl><div><dt>Goal</dt><dd>Enter the overwhelmed city.</dd></div><div><dt>Input</dt><dd>Click or tap the tiny void.</dd></div><div><dt>Feedback</dt><dd>Layered sounds briefly become louder.</dd></div><div><dt>Continue</dt><dd>Small nearby objects begin to pulse.</dd></div></dl>
+        </article>
+        <article class="story-frame">
+          <div class="frame-art frame-release" aria-hidden="true"><span class="frame-hole"></span><i class="frame-small-one"></i><i class="frame-small-two"></i></div>
+          <span class="frame-number">02 · STAGE 01</span><h4>Release</h4>
+          <dl><div><dt>Goal</dt><dd>Swallow six pieces of small clutter.</dd></div><div><dt>Input</dt><dd>Move or drag across an object.</dd></div><div><dt>Feedback</dt><dd>It drops with a soft pop; the hole expands.</dd></div><div><dt>Continue</dt><dd>Medium objects gain a visible outline.</dd></div></dl>
+        </article>
+        <article class="story-frame">
+          <div class="frame-art frame-grow" aria-hidden="true"><span class="frame-hole"></span><i class="frame-building"></i></div>
+          <span class="frame-number">03 · STAGE 02</span><h4>Grow</h4>
+          <dl><div><dt>Goal</dt><dd>Clear a path through larger thoughts.</dd></div><div><dt>Input</dt><dd>Return to cars, signs, and small buildings.</dd></div><div><dt>Feedback</dt><dd>Objects wobble, tilt, and slide inward.</dd></div><div><dt>Continue</dt><dd>The streets bend as the city hallucinates.</dd></div></dl>
+        </article>
+        <article class="story-frame">
+          <div class="frame-art frame-notice-static" aria-hidden="true"><span class="frame-hole"></span><i class="real-object"></i><i class="false-object"></i><b>WHICH ONE IS SOLID?</b></div>
+          <span class="frame-number">04 · STAGE 03</span><h4>Notice</h4>
+          <dl><div><dt>Goal</dt><dd>Find solid objects among flickering copies.</dd></div><div><dt>Input</dt><dd>Move through a version of the object.</dd></div><div><dt>Feedback</dt><dd>False copies dissolve; real ones add growth.</dd></div><div><dt>Continue</dt><dd>Choose one glowing memory to leave untouched.</dd></div></dl>
+        </article>
+        <article class="story-frame">
+          <div class="frame-art frame-breathe" aria-hidden="true"><span class="frame-moon"></span><i class="frame-memory">✦</i><p>THE CITY IS QUIET.<br>ONE THING REMAINS.</p></div>
+          <span class="frame-number">05 · ENDING</span><h4>Breathe</h4>
+          <dl><div><dt>Goal</dt><dd>See the space you created.</dd></div><div><dt>Input</dt><dd>Release the pointer or finger.</dd></div><div><dt>Feedback</dt><dd>Sound settles into one warm sustained tone.</dd></div><div><dt>Continue</dt><dd>Replay to preserve a different memory.</dd></div></dl>
+        </article>
+      </div>
+    </section>
+
+    <section class="proposal-section style-section" id="style" aria-labelledby="style-title">
+      <div class="section-number">06</div>
+      <div class="proposal-heading"><p class="proposal-kicker">Style and sound guide</p><h2 id="style-title">Playful destruction, gentle release.</h2></div>
+      <div class="style-grid">
+        <div class="palette-panel">
+          <p class="card-label">Color system</p><h3>Bright enough to invite, quiet enough to breathe.</h3>
+          <div class="swatches" aria-label="Game color palette">
+            <span style="--swatch:#f7f0e2"><i>#F7F0E2</i><b>Quiet cream</b></span><span style="--swatch:#171a2a"><i>#171A2A</i><b>Void ink</b></span><span style="--swatch:#ff8f79"><i>#FF8F79</i><b>Pressure coral</b></span><span style="--swatch:#7ed7d1"><i>#7ED7D1</i><b>Calm aqua</b></span>
+          </div>
+          <p>Coral marks crowded or false objects. Aqua appears as the scene becomes quieter. Dark navy replaces pure black so the void feels soft rather than frightening.</p>
+        </div>
+        <div class="type-panel"><p class="card-label">Typography</p><p class="type-serif">Swallow<br>the Static</p><p class="type-sans">NOISE 42% / HOLE SIZE 03</p><p>A friendly editorial serif gives the project emotion. A compact uppercase sans serif reports size and noise without turning the page into a competitive scoreboard.</p></div>
+      </div>
+      <div class="reference-grid">
+        <article>
+          <div class="reference-art hole-reference" aria-hidden="true"><span></span><i></i><b>SMALL → LARGE</b></div>
+          <p class="card-label">Interaction reference 01</p><h3><em>Hole.io</em></h3><p>Voodoo, 2018. The clear size rule and immediate suction feedback teach the interaction without a long tutorial. I will reuse that clarity, not the competitive leaderboard.</p><a href="https://voodoo.io/hole" target="_blank" rel="noreferrer">Official Voodoo project ↗</a>
+        </article>
+        <article>
+          <div class="reference-art valley-reference" aria-hidden="true"><span></span><i></i><b>IMPOSSIBLE BUT CALM</b></div>
+          <p class="card-label">Visual reference 02</p><h3><em>Monument Valley</em></h3><p>ustwo games. Its soft geometric architecture and impossible paths show how a distorted world can remain elegant and welcoming. It guides the tilted streets and pastel city.</p><a href="https://ustwo.com/work/monument-valley/" target="_blank" rel="noreferrer">Official ustwo project ↗</a>
+        </article>
+        <article>
+          <div class="reference-art pause-reference" aria-hidden="true"><span></span><i></i><b>MOVE · LISTEN · SLOW</b></div>
+          <p class="card-label">Motion + sound reference 03</p><h3><em>PAUSE</em></h3><p>ustwo and PauseAble. Slow repetitive movement and a responsive sweeping tone turn touch into a calming rhythm. This supports softer motion and audio in the final stage.</p><a href="https://ustwo.com/work/pause/" target="_blank" rel="noreferrer">Official ustwo case study ↗</a>
+        </article>
+      </div>
+      <div class="motion-sound-grid">
+        <article><p class="proposal-kicker">Interface + motion</p><h3>Every object should feel good to clear.</h3><ul><li>Small objects wobble before falling inward.</li><li>The hole expands with a soft elastic ease, never a sharp flash.</li><li>False objects use a transparent double-image and dissolve on contact.</li><li>The camera pulls back slightly as the hole grows.</li><li>Reduced-motion mode removes wobble and camera scaling.</li></ul></article>
+        <article class="sound-card"><p class="proposal-kicker">Sound + silence</p><h3>The mix becomes simpler as the city empties.</h3><ul><li>Small objects make light wooden pops.</li><li>Large objects add a low, rounded whoosh.</li><li>False objects make a dry airy whisper instead of an impact.</li><li>Each stage removes one layer of background noise.</li><li>A visible mute control is always available.</li></ul><button class="sound-demo" id="sound-demo" type="button" aria-pressed="false">Play the swallow sound <span aria-hidden="true">♪</span></button><p class="sound-note">Original browser-synthesized sketch. Final interface sounds may use Kenney’s CC0 Interface Sounds with credit.</p></article>
+      </div>
+    </section>
+
+    <section class="proposal-section plan-section" id="build-plan" aria-labelledby="plan-title">
+      <div class="section-number">07</div>
+      <div class="proposal-heading"><p class="proposal-kicker">Two-week build plan</p><h2 id="plan-title">Build the satisfying loop first. Add hallucination second.</h2></div>
+      <div class="plan-grid">
+        <article>
+          <div class="week-label"><span>Week 02</span><b>Playable prototype</b></div>
+          <ol><li><strong>Build one 2D scene:</strong> create a responsive top-down city in HTML Canvas or positioned HTML elements.</li><li><strong>Build movement:</strong> support pointer, touch drag, and arrow keys.</li><li><strong>Build the core loop:</strong> detect object size, swallow valid objects, and grow the hole.</li><li><strong>Build the journey:</strong> opening, three short stages, protected memory, ending, and replay.</li><li><strong>Add basic feedback:</strong> wobble, drop, size indicator, noise meter, and simple generated sound.</li></ol>
+          <p class="week-output"><strong>Week 2 output:</strong> a complete 3–5 minute game with temporary shapes and all stages working on mouse and touch.</p>
+        </article>
+        <article>
+          <div class="week-label"><span>Week 03</span><b>Test, refine, publish</b></div>
+          <ol><li><strong>Observe three players:</strong> record where they understand the size rule and where they get stuck.</li><li><strong>Test the feeling:</strong> ask whether swallowing feels satisfying, stressful, confusing, or repetitive.</li><li><strong>Refine pacing:</strong> tune object sizes, growth speed, stage length, and false-copy frequency.</li><li><strong>Polish access:</strong> readable contrast, keyboard control, mute, reduced motion, and phone layout.</li><li><strong>Publish and verify:</strong> test the direct URL, replay, interaction, and sound in a private browser window.</li></ol>
+          <p class="week-output"><strong>Week 3 output:</strong> a tested, refined game published as a new page inside this portfolio.</p>
+        </article>
+      </div>
+      <div class="scope-lock"><p class="proposal-kicker">Scope lock</p><p>One 2D city. One steer-and-swallow interaction. Three short stages with 12–15 objects each. One protected memory and one ending. No 3D engine, multiplayer, enemies, account, shop, or online leaderboard.</p></div>
+    </section>
+
+    <section class="proposal-section sources-section" aria-labelledby="sources-title">
+      <div class="section-number">↗</div>
+      <div class="proposal-heading"><p class="proposal-kicker">Research credits</p><h2 id="sources-title">Sources and references</h2></div>
+      <ol class="sources-list">
+        <li><span>Voodoo.</span> <a href="https://voodoo.io/hole" target="_blank" rel="noreferrer"><em>Hole.io</em> — official game page and core description.</a></li>
+        <li><span>Voodoo / Google Play.</span> <a href="https://play.google.com/store/apps/details?id=io.voodoo.holeio" target="_blank" rel="noreferrer"><em>Hole.io</em> store page — credited developer, modes, interaction, and current description.</a></li>
+        <li><span>Poki.</span> <a href="https://poki.com/en/g/hole-io" target="_blank" rel="noreferrer"><em>Hole.io</em> — playable browser version, controls, and Voodoo credit.</a></li>
+        <li><span>Voodoo.</span> <a href="https://jobs.ashbyhq.com/voodoo/ef8a012a-2a4f-42fb-8925-4cdcf2977f45" target="_blank" rel="noreferrer">Principal Game Designer — Hole.io: notes on suction, friction, bounce, camera, and easing.</a></li>
+        <li><span>ustwo games.</span> <a href="https://ustwo.com/work/monument-valley/" target="_blank" rel="noreferrer"><em>Monument Valley</em> — official project and impossible-architecture reference.</a></li>
+        <li><span>ustwo + PauseAble.</span> <a href="https://ustwo.com/work/pause/" target="_blank" rel="noreferrer"><em>PAUSE</em> — official case study on repetitive movement and calming sound.</a></li>
+        <li><span>Kenney.</span> <a href="https://kenney.nl/assets/interface-sounds" target="_blank" rel="noreferrer">Interface Sounds — CC0 audio reference.</a></li>
+      </ol>
+      <p class="access-note">Research checked October 26, 2026. Case-study observations and interpretation are my own. Proposal visuals, flowchart, storyboard, and interactive concept sketch are original HTML/CSS/JavaScript made for this page.</p>
+    </section>
+
+    <section class="proposal-end"><p class="proposal-kicker">Swallow the Static · Next step</p><h2>Make some room to breathe.</h2><a class="proposal-button solid" href="#top">Return to the beginning ↑</a></section>
+  </main>
+  <footer class="site-footer proposal-footer"><p>© <span data-year></span> Criss Binoi</p><a href="index.html">Portfolio home ↗</a></footer>
+</body>
+</html>
