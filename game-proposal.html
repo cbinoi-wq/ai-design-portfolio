@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Swallow the Static — Criss Binoi's game proposal about hallucination, stress, and making a noisy world quiet.">
   <title>Swallow the Static — Game Proposal · Criss Binoi</title>
-  <link rel="stylesheet" href="styles.css?v=13">
-  <link rel="stylesheet" href="game-proposal.css?v=2">
-  <script src="script.js?v=13" defer></script>
-  <script src="game-proposal.js?v=2" defer></script>
+  <link rel="stylesheet" href="styles.css?v=14">
+  <link rel="stylesheet" href="game-proposal.css?v=3">
+  <script src="script.js?v=14" defer></script>
+  <script src="game-proposal.js?v=3" defer></script>
 </head>
 <body class="proposal-page" data-page="proposal">
   <header class="site-header proposal-header" id="top">
@@ -18,6 +18,7 @@
       <a href="album-cover.html">Album Cover</a>
       <a href="greenhouse-sanctuary.html">3D Environment</a>
       <a class="active" href="game-proposal.html">Game Proposal</a>
+      <a href="game.html">Play Game</a>
     </nav>
   </header>
 
@@ -26,10 +27,10 @@
       <div class="proposal-hero-copy">
         <p class="proposal-kicker">Hallucination · Web game proposal · Week 01</p>
         <h1 id="proposal-title">SWALLOW<br><em>THE STATIC.</em></h1>
-        <p class="proposal-tagline">A tiny void eats the thoughts that will not leave you alone.</p>
-        <p class="proposal-lede">Guide a small hole through a city made from anxious thoughts. Swallow visual noise, grow larger, and watch reality bend. Some objects are solid, some are hallucinated echoes, and one memory should remain.</p>
+        <p class="proposal-tagline">A tiny dream creature eats the thoughts that will not leave you alone.</p>
+        <p class="proposal-lede">Guide a tiny dream eater through a city made from anxious thoughts. Swallow visual noise, grow larger, and watch reality bend. Some objects are solid, some are hallucinated echoes, and one memory should remain.</p>
         <div class="proposal-actions">
-          <a class="proposal-button solid" href="#journey">Follow the player journey</a>
+          <a class="proposal-button solid" href="game.html">Play the Week 2 draft</a>
           <a class="proposal-button" href="#case-study">See the Hole.io study</a>
         </div>
         <dl class="proposal-meta">
@@ -41,7 +42,7 @@
 
       <div class="room-poster swallow-poster" id="swallow-poster" aria-label="Interactive concept visual for Swallow the Static">
         <div class="demo-topline">
-          <p class="room-status" id="demo-status" aria-live="polite">NOISE 100% · HOLE SIZE 01</p>
+          <p class="room-status" id="demo-status" aria-live="polite">NOISE 100% · CREATURE SIZE 01</p>
           <button class="demo-reset" id="demo-reset" type="button">Reset</button>
         </div>
         <div class="swallow-demo" id="swallow-demo">
@@ -55,10 +56,12 @@
           <button class="demo-object object-house edible-two" style="--x:72%;--y:77%" data-size="2" aria-label="Swallow a small house"></button>
           <button class="demo-object object-tower edible-three" style="--x:43%;--y:13%" data-size="3" aria-label="Swallow a tower"></button>
           <button class="demo-object object-memory" style="--x:48%;--y:72%" data-size="9" aria-label="A memory that cannot be swallowed"><span>✦</span></button>
-          <span class="demo-hole" id="demo-hole" aria-hidden="true"><i></i></span>
+          <span class="demo-hole demo-monster" id="demo-hole" aria-hidden="true">
+            <i class="monster-eye eye-left"></i><i class="monster-eye eye-right"></i><i class="monster-mouth"></i>
+          </span>
           <p class="demo-message" id="demo-message">Start with the smallest objects.</p>
         </div>
-        <p class="room-hint">Try the concept: tap an object. The hole can only swallow things smaller than itself.</p>
+        <p class="room-hint">Try it: tap an object. The dream creature can only swallow things smaller than itself.</p>
       </div>
     </section>
 
@@ -72,13 +75,13 @@
       <div class="intro-grid">
         <p class="large-copy">In <em>Swallow the Static</em>, hallucination is the way stress can make ordinary things feel louder, larger, and impossible to ignore.</p>
         <div class="body-copy">
-          <p>The player controls a small circular void in a dreamlike city. Moving across objects consumes them if they are small enough. Each object makes the void grow, but it also causes the city to duplicate, tilt, and invent new objects.</p>
+          <p>The player controls a tiny floating mouth in a dreamlike city. Moving across objects consumes them if they are small enough. Each object makes the creature grow, but it also causes the city to duplicate, tilt, and invent new objects.</p>
           <p>The main interaction stays simple across three stages: move, swallow, grow. The emotional goal is not destruction for its own sake. It is the satisfying feeling of clearing a crowded space until only one calm memory remains.</p>
         </div>
       </div>
       <div class="experience-strip" aria-label="Intended player experience">
         <article><span>01</span><strong>Release</strong><p>Small objects disappear with soft, satisfying feedback.</p></article>
-        <article><span>02</span><strong>Power</strong><p>The growing hole can consume what blocked it before.</p></article>
+        <article><span>02</span><strong>Power</strong><p>The growing creature can consume what blocked it before.</p></article>
         <article><span>03</span><strong>Doubt</strong><p>Copied objects and false shadows make reality unreliable.</p></article>
         <article><span>04</span><strong>Quiet</strong><p>The player chooses what to keep instead of eating everything.</p></article>
       </div>
@@ -170,7 +173,7 @@
       </div>
       <div class="decision-grid">
         <div><p class="proposal-kicker">My conclusion</p><p class="large-copy">The pleasure comes from making visual noise disappear.</p></div>
-        <div class="body-copy"><p>AI helped me separate the game’s competitive goal from my own emotional experience. The contradiction—destruction that feels calming—is more interesting than simply copying the original score system.</p><p><strong>Design decision:</strong> my game will have no rivals, combat, or public leaderboard. The hole grows through soft, responsive motion while the world becomes quieter. The final stage asks the player to keep one memory instead of swallowing absolutely everything.</p></div>
+        <div class="body-copy"><p>AI helped me separate the game’s competitive goal from my own emotional experience. The contradiction—destruction that feels calming—is more interesting than simply copying the original score system.</p><p><strong>Design decision:</strong> my game will have no rivals, combat, or public leaderboard. The dream creature grows through soft, responsive motion while the world becomes quieter. The final stage asks the player to keep one memory instead of swallowing absolutely everything.</p></div>
       </div>
     </section>
 
@@ -180,8 +183,8 @@
       <div class="concept-statement"><p>My interpretation of <strong>Hallucination</strong> is a world where anxious thoughts become physical. A notification grows into a tower. One cup becomes five. Shadows detach from objects. The city is not objectively real; it is how an overwhelmed mind experiences it.</p></div>
       <div class="concept-grid">
         <article><span>World</span><h3>A soft city built from everyday mental clutter.</h3><p>Phones, clocks, unfinished notes, cups, cars, and buildings float on a calm grid. Stress duplicates them and bends the streets into impossible loops.</p></article>
-        <article><span>Player role</span><h3>A small quiet space inside the noise.</h3><p>The player is not a hero or monster. They control an empty circle that can make crowded thoughts disappear and create room to breathe.</p></article>
-        <article><span>Main interaction</span><h3>Steer toward smaller objects to swallow them.</h3><p>The cursor, finger, or arrow keys guide the void. Consumed objects add size. Hallucinated copies flicker and give no growth, teaching the player to notice what is solid.</p></article>
+        <article><span>Player role</span><h3>A small quiet space inside the noise.</h3><p>The player is not a hero or villain. They guide a strange but friendly dream creature that makes crowded thoughts disappear and creates room to breathe.</p></article>
+        <article><span>Main interaction</span><h3>Steer the creature toward smaller objects to swallow them.</h3><p>The cursor, finger, or arrow keys guide the mouth. Consumed objects add size. Hallucinated copies flicker and give no growth, teaching the player to notice what is solid.</p></article>
         <article><span>Desired experience</span><h3>Cathartic, strange, and gently reflective.</h3><p>The first two stages should feel immediately satisfying. The last stage slows down and asks whether making space must mean erasing everything.</p></article>
       </div>
       <div class="narrative-premise"><p class="proposal-kicker">Short narrative premise</p><blockquote>A city forms from everything you tried not to think about. Become the quiet space inside it. Swallow the static, notice what is false, and leave one thing worth remembering.</blockquote></div>
@@ -192,23 +195,23 @@
       <div class="section-number">05</div>
       <div class="proposal-heading"><p class="proposal-kicker">Interaction and player journey</p><h2 id="journey-title">One movement develops through five beats.</h2></div>
       <div class="journey-flow" aria-label="Game flowchart">
-        <article><span>Opening</span><strong>Listen</strong><p>The noisy city appears around a tiny void.</p></article><i aria-hidden="true">→</i>
+        <article><span>Opening</span><strong>Listen</strong><p>The noisy city appears around a tiny dream creature.</p></article><i aria-hidden="true">→</i>
         <article><span>Stage 01</span><strong>Release</strong><p>Swallow small clutter and learn the size rule.</p></article><i aria-hidden="true">→</i>
         <article><span>Stage 02</span><strong>Grow</strong><p>Return to objects that were too large before.</p></article><i aria-hidden="true">→</i>
         <article><span>Stage 03</span><strong>Notice</strong><p>Ignore false copies and protect one memory.</p></article><i aria-hidden="true">→</i>
-        <article><span>Ending</span><strong>Breathe</strong><p>The hole becomes a moon above a quiet city.</p></article>
+        <article><span>Ending</span><strong>Breathe</strong><p>The creature becomes a moon above a quiet city.</p></article>
       </div>
       <div class="storyboard-heading"><div><p class="proposal-kicker">Storyboard</p><h3>Five frames show goal, input, feedback, and continuation.</h3></div><p>The game uses one compact top-down scene. New behavior, scale, and sound create the three stages, keeping the two-week build realistic.</p></div>
       <div class="storyboard-grid">
         <article class="story-frame">
           <div class="frame-art frame-static-opening" aria-hidden="true"><span class="frame-hole"></span><i></i><b>TOO LOUD?</b></div>
           <span class="frame-number">01 · OPENING</span><h4>Listen</h4>
-          <dl><div><dt>Goal</dt><dd>Enter the overwhelmed city.</dd></div><div><dt>Input</dt><dd>Click or tap the tiny void.</dd></div><div><dt>Feedback</dt><dd>Layered sounds briefly become louder.</dd></div><div><dt>Continue</dt><dd>Small nearby objects begin to pulse.</dd></div></dl>
+          <dl><div><dt>Goal</dt><dd>Enter the overwhelmed city.</dd></div><div><dt>Input</dt><dd>Click or tap the tiny creature.</dd></div><div><dt>Feedback</dt><dd>Layered sounds briefly become louder.</dd></div><div><dt>Continue</dt><dd>Small nearby objects begin to pulse.</dd></div></dl>
         </article>
         <article class="story-frame">
           <div class="frame-art frame-release" aria-hidden="true"><span class="frame-hole"></span><i class="frame-small-one"></i><i class="frame-small-two"></i></div>
           <span class="frame-number">02 · STAGE 01</span><h4>Release</h4>
-          <dl><div><dt>Goal</dt><dd>Swallow six pieces of small clutter.</dd></div><div><dt>Input</dt><dd>Move or drag across an object.</dd></div><div><dt>Feedback</dt><dd>It drops with a soft pop; the hole expands.</dd></div><div><dt>Continue</dt><dd>Medium objects gain a visible outline.</dd></div></dl>
+          <dl><div><dt>Goal</dt><dd>Swallow six pieces of small clutter.</dd></div><div><dt>Input</dt><dd>Move or drag across an object.</dd></div><div><dt>Feedback</dt><dd>It drops with a soft pop; the creature grows.</dd></div><div><dt>Continue</dt><dd>Medium objects gain a visible outline.</dd></div></dl>
         </article>
         <article class="story-frame">
           <div class="frame-art frame-grow" aria-hidden="true"><span class="frame-hole"></span><i class="frame-building"></i></div>
@@ -237,9 +240,9 @@
           <div class="swatches" aria-label="Game color palette">
             <span style="--swatch:#f7f0e2"><i>#F7F0E2</i><b>Quiet cream</b></span><span style="--swatch:#171a2a"><i>#171A2A</i><b>Void ink</b></span><span style="--swatch:#ff8f79"><i>#FF8F79</i><b>Pressure coral</b></span><span style="--swatch:#7ed7d1"><i>#7ED7D1</i><b>Calm aqua</b></span>
           </div>
-          <p>Coral marks crowded or false objects. Aqua appears as the scene becomes quieter. Dark navy replaces pure black so the void feels soft rather than frightening.</p>
+          <p>Coral marks crowded or false objects. Aqua appears as the scene becomes quieter. Dark navy and plum keep the creature soft and strange rather than frightening.</p>
         </div>
-        <div class="type-panel"><p class="card-label">Typography</p><p class="type-serif">Swallow<br>the Static</p><p class="type-sans">NOISE 42% / HOLE SIZE 03</p><p>A friendly editorial serif gives the project emotion. A compact uppercase sans serif reports size and noise without turning the page into a competitive scoreboard.</p></div>
+        <div class="type-panel"><p class="card-label">Typography</p><p class="type-serif">Swallow<br>the Static</p><p class="type-sans">NOISE 42% / CREATURE SIZE 03</p><p>A friendly editorial serif gives the project emotion. A compact uppercase sans serif reports size and noise without turning the page into a competitive scoreboard.</p></div>
       </div>
       <div class="reference-grid">
         <article>
@@ -256,8 +259,8 @@
         </article>
       </div>
       <div class="motion-sound-grid">
-        <article><p class="proposal-kicker">Interface + motion</p><h3>Every object should feel good to clear.</h3><ul><li>Small objects wobble before falling inward.</li><li>The hole expands with a soft elastic ease, never a sharp flash.</li><li>False objects use a transparent double-image and dissolve on contact.</li><li>The camera pulls back slightly as the hole grows.</li><li>Reduced-motion mode removes wobble and camera scaling.</li></ul></article>
-        <article class="sound-card"><p class="proposal-kicker">Sound + silence</p><h3>The mix becomes simpler as the city empties.</h3><ul><li>Small objects make light wooden pops.</li><li>Large objects add a low, rounded whoosh.</li><li>False objects make a dry airy whisper instead of an impact.</li><li>Each stage removes one layer of background noise.</li><li>A visible mute control is always available.</li></ul><button class="sound-demo" id="sound-demo" type="button" aria-pressed="false">Play the swallow sound <span aria-hidden="true">♪</span></button><p class="sound-note">Original browser-synthesized sketch. Final interface sounds may use Kenney’s CC0 Interface Sounds with credit.</p></article>
+        <article><p class="proposal-kicker">Interface + motion</p><h3>Every object should feel good to clear.</h3><ul><li>Small objects wobble before falling inward.</li><li>The creature grows with a soft elastic ease, never a sharp flash.</li><li>False objects use a transparent double-image and dissolve on contact.</li><li>The camera pulls back slightly as the creature grows.</li><li>Reduced-motion mode removes wobble and camera scaling.</li></ul></article>
+        <article class="sound-card"><p class="proposal-kicker">Sound + silence</p><h3>The mix becomes simpler as the city empties.</h3><ul><li>Small objects make light wooden pops.</li><li>Large objects add a low, rounded whoosh.</li><li>False objects make a dry airy whisper instead of an impact.</li><li>Each stage removes one layer of background noise.</li><li>A visible mute control is always available.</li></ul><button class="sound-demo" id="sound-demo" type="button" aria-pressed="false">Play the gentle gulp <span aria-hidden="true">♪</span></button><p class="sound-note">Original browser-synthesized sketch. Final interface sounds may use Kenney’s CC0 Interface Sounds with credit.</p></article>
       </div>
     </section>
 
@@ -267,7 +270,7 @@
       <div class="plan-grid">
         <article>
           <div class="week-label"><span>Week 02</span><b>Playable prototype</b></div>
-          <ol><li><strong>Build one 2D scene:</strong> create a responsive top-down city in HTML Canvas or positioned HTML elements.</li><li><strong>Build movement:</strong> support pointer, touch drag, and arrow keys.</li><li><strong>Build the core loop:</strong> detect object size, swallow valid objects, and grow the hole.</li><li><strong>Build the journey:</strong> opening, three short stages, protected memory, ending, and replay.</li><li><strong>Add basic feedback:</strong> wobble, drop, size indicator, noise meter, and simple generated sound.</li></ol>
+          <ol><li><strong>Build one 2D scene:</strong> create a responsive top-down city in HTML Canvas or positioned HTML elements.</li><li><strong>Build movement:</strong> support pointer, touch drag, and arrow keys.</li><li><strong>Build the core loop:</strong> detect object size, swallow valid objects, and grow the creature.</li><li><strong>Build the journey:</strong> opening, three short stages, protected memory, ending, and replay.</li><li><strong>Add basic feedback:</strong> wobble, drop, size indicator, noise meter, and simple generated sound.</li></ol>
           <p class="week-output"><strong>Week 2 output:</strong> a complete 3–5 minute game with temporary shapes and all stages working on mouse and touch.</p>
         </article>
         <article>
