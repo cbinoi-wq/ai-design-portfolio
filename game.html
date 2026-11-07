@@ -6,9 +6,9 @@
   <meta name="description" content="Play Swallow the Static, Criss Binoi's first interactive game draft about clearing visual noise and protecting one memory.">
   <title>Swallow the Static | Playable Draft · Criss Binoi</title>
   <link rel="stylesheet" href="styles.css?v=14">
-  <link rel="stylesheet" href="game.css?v=1">
+  <link rel="stylesheet" href="game.css?v=3">
   <script src="script.js?v=14" defer></script>
-  <script src="game.js?v=1" defer></script>
+  <script src="game.js?v=2" defer></script>
 </head>
 <body class="game-page" data-page="game">
   <header class="site-header game-header" id="top">
@@ -25,16 +25,21 @@
       <div class="game-intro-copy">
         <p class="game-kicker">Hallucination · Interactive game · First draft</p>
         <h1 id="game-title">SWALLOW<br><em>THE STATIC.</em></h1>
-        <p>A tiny dream creature is surrounded by thoughts that feel too loud. Clear the solid clutter, notice what is only an echo, and protect the one memory that should remain.</p>
+        <p class="cover-lede">A tiny dream creature is surrounded by thoughts that feel too loud. Clear the solid clutter, notice what is only an echo, and protect the one memory that should remain.</p>
+        <div class="cover-actions">
+          <a class="cover-button cover-button-primary" href="#play">Play the game</a>
+          <a class="cover-button" href="game-proposal.html">View the proposal</a>
+        </div>
+        <div class="game-intro-note" aria-label="Game details">
+          <span>3 short stages</span>
+          <span>About 2 minutes</span>
+          <span>Touch, mouse, or keys</span>
+        </div>
       </div>
-      <div class="game-intro-note" aria-label="Game details">
-        <span>3 short stages</span>
-        <span>About 2 minutes</span>
-        <span>Touch, mouse, or keys</span>
-      </div>
+
     </section>
 
-    <section class="game-stage-section" aria-label="Playable game area">
+    <section class="game-stage-section" id="play" aria-label="Playable game area">
       <div class="game-frame" id="game-frame">
         <div class="game-hud">
           <div class="hud-stage"><span id="stage-number">STAGE 01</span><strong id="stage-name">Release</strong></div>

@@ -231,10 +231,11 @@
   }
 
   function ensureAudio() {
-    if (!audioEnabled || audioContext) return;
+    if (!audioEnabled) return;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
-    audioContext = new AudioContext();
+    if (!audioContext) audioContext = new AudioContext();
+    if (audioContext.state === 'suspended') audioContext.resume();
   }
 
   function tone(startFrequency, endFrequency, duration, volume, type = 'sine', delay = 0) {
@@ -258,8 +259,11 @@
   }
 
   function playGulp() {
-    tone(150, 72, .28, .055, 'sine');
-    tone(82, 48, .34, .025, 'sine', .07);
+    // A short bright pop makes the contact easy to hear, followed by a
+    // rounded low gulp. All tones are synthesized in the browser.
+    tone(330, 145, .13, .06, 'triangle');
+    tone(175, 58, .38, .09, 'sine', .035);
+    tone(92, 44, .45, .04, 'sine', .09);
   }
 
   function playEcho() {
