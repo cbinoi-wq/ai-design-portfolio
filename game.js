@@ -21,6 +21,11 @@
   const soundToggle = document.querySelector('#sound-toggle');
   const restartButton = document.querySelector('#restart-game');
 
+  const gameBoardImage = new Image();
+  gameBoardImage.src = 'assets/swallow-static-game-board.png?v=1';
+  const creatureImage = new Image();
+  creatureImage.src = 'assets/swallow-static-creature.png?v=1';
+
   const WORLD = { width: 960, height: 620 };
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const stages = [
@@ -28,7 +33,7 @@
       name: 'Release',
       goal: 7,
       echoes: 0,
-      message: 'Clear the small, solid thoughts.',
+      message: 'Chase the glowing thoughts. Swallow them quickly for a sparkle combo!',
       colors: ['#c8d8d4', '#e8d2cb'],
       intro: 'Start with what feels manageable.',
       copy: 'Move into the solid objects. Every gentle gulp makes the world quieter and helps the creature grow.'
@@ -75,12 +80,16 @@
   let bumpCooldown = 0;
   let objectId = 0;
   let animationFrame = 0;
+  let combo = 0;
+  let comboTimer = 0;
+  let comboFlash = 0;
+  let trailTimer = 0;
 
   const player = {
     x: WORLD.width * .5,
     y: WORLD.height * .57,
-    radius: 28,
-    targetRadius: 28,
+    radius: 34,
+    targetRadius: 34,
     vx: 0,
     vy: 0,
     chomp: 0,
@@ -94,6 +103,16 @@
     const rect = wrap.getBoundingClientRect();
     cssWidth = rect.width;
     cssHeight = rect.height;
+    const previousWorldWidth = WORLD.width;
+    const nextWorldWidth = Math.max(460, Math.min(960, WORLD.height * (cssWidth / cssHeight)));
+    if (Math.abs(nextWorldWidth - previousWorldWidth) > 1) {
+      const horizontalScale = nextWorldWidth / previousWorldWidth;
+      player.x *= horizontalScale;
+      objects.forEach((object) => { object.x *= horizontalScale; });
+      if (pointerTarget) pointerTarget.x *= horizontalScale;
+      WORLD.width = nextWorldWidth;
+      player.x = Math.max(player.radius + 9, Math.min(WORLD.width - player.radius - 9, player.x));
+    }
     pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(cssWidth * pixelRatio);
     canvas.height = Math.round(cssHeight * pixelRatio);
@@ -145,12 +164,16 @@
     cleared = 0;
     noise = 100;
     completionReady = false;
+    combo = 0;
+    comboTimer = 0;
+    comboFlash = 0;
+    trailTimer = 0;
     objects = [];
     particles = [];
     ripples = [];
     player.x = WORLD.width * .5;
     player.y = WORLD.height * .57;
-    player.radius = 28 + index * 4;
+    player.radius = 34 + index * 4;
     player.targetRadius = player.radius;
     player.vx = 0;
     player.vy = 0;
@@ -266,6 +289,11 @@
     tone(92, 44, .45, .04, 'sine', .09);
   }
 
+  function playCombo() {
+    tone(420, 620, .18, .035, 'sine');
+    tone(620, 880, .24, .026, 'sine', .08);
+  }
+
   function playEcho() {
     tone(430, 260, .18, .018, 'sine');
     tone(520, 310, .22, .012, 'sine', .04);
@@ -281,8 +309,8 @@
     tone(660, 880, .55, .018, 'sine', .28);
   }
 
-  function addParticles(object, color) {
-    const amount = reducedMotion ? 4 : 12;
+  function addParticles(object, color, extra = 0) {
+    const amount = reducedMotion ? 5 : 14 + extra;
     for (let index = 0; index < amount; index += 1) {
       const angle = random(0, Math.PI * 2);
       particles.push({
@@ -292,7 +320,8 @@
         vy: Math.sin(angle) * random(22, 90),
         life: 1,
         size: random(2, 5),
-        color
+        color,
+        shape: index % 3 === 0 ? 'star' : 'dot'
       });
     }
     ripples.push({ x: object.x, y: object.y, radius: object.radius, life: 1, color });
@@ -302,14 +331,20 @@
     if (object.removing) return;
     object.removing = true;
     player.chomp = 1;
+    combo = comboTimer > 0 ? combo + 1 : 1;
+    comboTimer = 2.15;
+    comboFlash = 1;
     cleared += 1;
     noise = Math.max(stageIndex === 2 ? 14 : 8, 100 - (cleared / stages[stageIndex].goal) * (stageIndex === 2 ? 86 : 92));
     player.targetRadius = Math.min(47, player.targetRadius + 2.2);
-    addParticles(object, objectColor(object.kind));
+    addParticles(object, objectColor(object.kind), Math.min(12, combo * 2));
     playGulp();
+    if (combo >= 2) playCombo();
     message.textContent = cleared === stages[stageIndex].goal
       ? (stageIndex === 2 ? 'The city is quiet. Return to the glowing memory.' : 'This part of the city is quiet now.')
-      : ['Soft gulp. A little more room.', 'The noise is getting lighter.', 'You grew. Keep clearing the solid objects.'][cleared % 3];
+      : combo >= 2
+        ? `Sparkle combo x${combo}! Keep going!`
+        : ['Yum! Chase another glowing thought.', 'The city feels lighter already.', 'A little more room to breathe.'][cleared % 3];
     updateHud();
 
     if (cleared >= stages[stageIndex].goal) {
@@ -394,14 +429,33 @@
     if (!playing) return;
     elapsed += delta;
     bumpCooldown = Math.max(0, bumpCooldown - delta);
+    comboTimer = Math.max(0, comboTimer - delta);
+    comboFlash = Math.max(0, comboFlash - delta * 2.4);
+    if (comboTimer === 0) combo = 0;
     updatePlayer(delta);
+
+    const playerSpeed = Math.hypot(player.vx, player.vy);
+    trailTimer -= delta;
+    if (!reducedMotion && playerSpeed > 35 && trailTimer <= 0) {
+      trailTimer = .055;
+      particles.push({
+        x: player.x + random(-8, 8),
+        y: player.y + player.radius * .45 + random(-5, 5),
+        vx: random(-18, 18),
+        vy: random(10, 35),
+        life: .65,
+        size: random(2, 4.5),
+        color: Math.random() > .42 ? '#f1c663' : '#ffc1da',
+        shape: Math.random() > .55 ? 'star' : 'dot'
+      });
+    }
 
     objects.forEach((object) => {
       if (object.removing) {
         object.scale -= delta * 4.5;
         return;
       }
-      if (distance(player, object) < player.radius * .72 + object.radius * .72) {
+      if (distance(player, object) < player.radius * .72 + object.radius + 11) {
         if (object.type === 'solid') consumeObject(object);
         else if (object.type === 'echo') touchEcho(object);
         else touchMemory(object);
@@ -426,89 +480,165 @@
 
   function objectColor(kind) {
     const colors = {
-      note: '#fff6e6',
-      cup: '#e5898d',
-      phone: '#71c8c4',
-      clock: '#f1c663',
-      book: '#8b7baa',
-      lamp: '#e9a47f',
-      memory: '#fff0a7'
+      note: '#fff6df',
+      cup: '#ff9caf',
+      phone: '#7ce0dc',
+      clock: '#ffd36e',
+      book: '#b79bdf',
+      lamp: '#ffb47f',
+      memory: '#fff1a4'
     };
     return colors[kind] || '#fff6e6';
   }
 
-  function drawBackground(stage) {
-    const calm = 1 - noise / 100;
-    const gradient = context.createLinearGradient(0, 0, WORLD.width, WORLD.height);
-    gradient.addColorStop(0, stage.colors[0]);
-    gradient.addColorStop(1, stage.colors[1]);
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, WORLD.width, WORLD.height);
-
-    context.save();
-    context.globalAlpha = .18 - calm * .08;
-    context.strokeStyle = '#263247';
-    context.lineWidth = 1;
-    for (let x = -60; x < WORLD.width + 60; x += 62) {
-      context.beginPath();
-      context.moveTo(x + Math.sin(elapsed * .4 + x) * stageIndex * 2, 0);
-      context.lineTo(x - 50 + Math.sin(elapsed * .35 + x) * stageIndex * 4, WORLD.height);
-      context.stroke();
-    }
-    for (let y = 20; y < WORLD.height; y += 62) {
-      context.beginPath();
-      context.moveTo(0, y);
-      context.lineTo(WORLD.width, y + Math.sin(y * .03 + elapsed * .35) * stageIndex * 7);
-      context.stroke();
-    }
-    context.restore();
-
-    context.save();
-    context.globalAlpha = .4;
-    context.strokeStyle = '#fffaf1';
-    context.lineCap = 'round';
-    context.lineWidth = 54;
+  function starPath(x, y, outerRadius, innerRadius = outerRadius * .42, points = 4) {
     context.beginPath();
-    context.moveTo(-80, WORLD.height * .73);
-    context.bezierCurveTo(WORLD.width * .22, WORLD.height * .53, WORLD.width * .56, WORLD.height * .88, WORLD.width + 90, WORLD.height * .48);
-    context.stroke();
-    context.lineWidth = 35;
-    context.beginPath();
-    context.moveTo(WORLD.width * .72, -40);
-    context.bezierCurveTo(WORLD.width * .66, WORLD.height * .28, WORLD.width * .79, WORLD.height * .55, WORLD.width * .62, WORLD.height + 50);
-    context.stroke();
-    context.restore();
+    for (let point = 0; point < points * 2; point += 1) {
+      const angle = -Math.PI / 2 + point * Math.PI / points;
+      const radius = point % 2 === 0 ? outerRadius : innerRadius;
+      const pointX = x + Math.cos(angle) * radius;
+      const pointY = y + Math.sin(angle) * radius;
+      if (!point) context.moveTo(pointX, pointY); else context.lineTo(pointX, pointY);
+    }
+    context.closePath();
+  }
 
-    const buildingAlpha = .16 + stageIndex * .035;
+  function drawObjectFace(kind) {
+    const faceY = { note: 3, cup: 2, phone: 0, clock: 4, book: 5, lamp: -10 }[kind] ?? 2;
     context.save();
-    context.globalAlpha = buildingAlpha;
-    context.fillStyle = '#253149';
-    [[20,40,120,80],[170,20,75,105],[790,50,130,72],[40,440,100,130],[760,430,160,120]].forEach(([x,y,w,h], index) => {
-      context.fillRect(x, y, w, h);
-      context.fillStyle = index % 2 ? '#f8efe0' : '#253149';
-      for (let wx = x + 13; wx < x + w - 7; wx += 22) {
-        for (let wy = y + 13; wy < y + h - 7; wy += 24) context.fillRect(wx, wy, 7, 9);
-      }
-      context.fillStyle = '#253149';
-    });
+    context.rotate(-.02);
+    context.fillStyle = '#4b3559';
+    context.beginPath();
+    context.ellipse(-5, faceY, 1.7, 2.2, 0, 0, Math.PI * 2);
+    context.ellipse(5, faceY, 1.7, 2.2, 0, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = '#4b3559';
+    context.lineWidth = 1.2;
+    context.beginPath();
+    context.arc(0, faceY + 1, 4, .28, Math.PI - .28);
+    context.stroke();
+    context.fillStyle = 'rgba(239,105,145,.5)';
+    context.beginPath();
+    context.arc(-9, faceY + 4, 2, 0, Math.PI * 2);
+    context.arc(9, faceY + 4, 2, 0, Math.PI * 2);
+    context.fill();
     context.restore();
   }
 
-  function drawObjectShape(object, alpha = 1, offsetX = 0) {
+  function drawBackground(stage) {
+    const calm = 1 - noise / 100;
+    if (gameBoardImage.complete && gameBoardImage.naturalWidth) {
+      const imageRatio = gameBoardImage.naturalWidth / gameBoardImage.naturalHeight;
+      const worldRatio = WORLD.width / WORLD.height;
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = gameBoardImage.naturalWidth;
+      let sourceHeight = gameBoardImage.naturalHeight;
+      if (imageRatio > worldRatio) {
+        sourceWidth = sourceHeight * worldRatio;
+        sourceX = (gameBoardImage.naturalWidth - sourceWidth) / 2;
+      } else {
+        sourceHeight = sourceWidth / worldRatio;
+        sourceY = (gameBoardImage.naturalHeight - sourceHeight) / 2;
+      }
+      context.drawImage(gameBoardImage, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, WORLD.width, WORLD.height);
+    } else {
+      const gradient = context.createLinearGradient(0, 0, WORLD.width, WORLD.height);
+      gradient.addColorStop(0, '#272449');
+      gradient.addColorStop(1, '#4b2f61');
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, WORLD.width, WORLD.height);
+    }
+
+    const dreamWash = context.createLinearGradient(0, 0, 0, WORLD.height);
+    dreamWash.addColorStop(0, `rgba(19,18,48,${.18 + stageIndex * .045})`);
+    dreamWash.addColorStop(.52, `rgba(37,24,68,${.08 + (1 - calm) * .08})`);
+    dreamWash.addColorStop(1, 'rgba(12,15,35,.24)');
+    context.fillStyle = dreamWash;
+    context.fillRect(0, 0, WORLD.width, WORLD.height);
+
+    // Soft fireflies make the city feel alive without becoming obstacles.
     context.save();
-    context.translate(object.x + offsetX, object.y);
-    context.rotate(object.rotation);
+    for (let index = 0; index < 24; index += 1) {
+      const x = (index * 173 + 79) % WORLD.width;
+      const baseY = (index * 97 + 55) % WORLD.height;
+      const y = baseY + Math.sin(elapsed * .55 + index * 1.7) * 12;
+      const alpha = .16 + (Math.sin(elapsed * 1.4 + index) + 1) * .13;
+      context.globalAlpha = alpha;
+      context.fillStyle = index % 4 === 0 ? '#9ee9eb' : '#ffd97c';
+      context.shadowColor = context.fillStyle;
+      context.shadowBlur = 12;
+      context.beginPath();
+      context.arc(x, y, index % 3 === 0 ? 2.4 : 1.5, 0, Math.PI * 2);
+      context.fill();
+    }
+    context.restore();
+
+    if (stageIndex > 0) {
+      context.save();
+      context.globalAlpha = stageIndex === 1 ? .055 : .085;
+      context.fillStyle = '#7ed7d1';
+      context.fillRect(Math.sin(elapsed * 1.7) * 9 - 10, 0, WORLD.width, WORLD.height);
+      context.globalCompositeOperation = 'screen';
+      context.fillStyle = '#ff8f79';
+      context.fillRect(Math.cos(elapsed * 1.3) * -7 + 8, 0, WORLD.width, WORLD.height);
+      context.restore();
+    }
+  }
+
+  function drawObjectShape(object, alpha = 1, offsetX = 0) {
+    const color = objectColor(object.kind);
+    const floatY = reducedMotion ? 0 : Math.sin(elapsed * 2.4 + object.phase) * 4;
+    context.save();
+    context.translate(object.x + offsetX, object.y + floatY);
     context.scale(Math.max(0, object.scale), Math.max(0, object.scale));
     context.globalAlpha = alpha;
-    const color = objectColor(object.kind);
+
+    if (object.kind !== 'memory') {
+      const bubbleRadius = object.radius + 17;
+      const bubble = context.createRadialGradient(-bubbleRadius * .28, -bubbleRadius * .32, 2, 0, 0, bubbleRadius);
+      bubble.addColorStop(0, object.type === 'echo' ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.84)');
+      bubble.addColorStop(.52, object.type === 'echo' ? 'rgba(255,255,255,.025)' : `${color}bb`);
+      bubble.addColorStop(1, object.type === 'echo' ? 'rgba(255,255,255,0)' : `${color}4d`);
+      context.fillStyle = bubble;
+      context.strokeStyle = object.type === 'echo' ? 'rgba(255,255,255,.28)' : 'rgba(255,250,240,.86)';
+      context.lineWidth = object.type === 'echo' ? 1 : 1.8;
+      context.setLineDash(object.type === 'echo' ? [3, 5] : []);
+      context.shadowColor = color;
+      context.shadowBlur = object.type === 'echo' ? 7 : 24;
+      context.beginPath();
+      context.arc(0, 0, bubbleRadius, 0, Math.PI * 2);
+      context.fill();
+      context.shadowBlur = 0;
+      context.stroke();
+      context.setLineDash([]);
+
+      if (object.type !== 'echo') {
+        context.fillStyle = '#fff4b5';
+        context.shadowColor = '#fff1a0';
+        context.shadowBlur = 9;
+        starPath(bubbleRadius * .7, -bubbleRadius * .62, 4.5, 1.7);
+        context.fill();
+        context.globalAlpha = alpha * .62;
+        starPath(-bubbleRadius * .67, bubbleRadius * .48, 3, 1.2);
+        context.fill();
+        context.globalAlpha = alpha;
+      }
+    }
+
+    context.rotate(object.rotation);
+    context.shadowColor = color;
+    context.shadowBlur = object.type === 'echo' ? 5 : 10;
     context.fillStyle = color;
-    context.strokeStyle = '#24283a';
+    context.strokeStyle = '#4b3559';
     context.lineWidth = 2;
 
     if (object.kind === 'note') {
-      context.fillRect(-15, -19, 30, 38);
-      context.strokeRect(-15, -19, 30, 38);
+      context.beginPath();
+      context.roundRect(-15, -19, 30, 38, 4);
+      context.fill(); context.stroke();
       context.strokeStyle = '#e4837f';
+      context.lineWidth = 1.4;
       context.beginPath();
       context.moveTo(-8, -8); context.lineTo(8, -8);
       context.moveTo(-8, 0); context.lineTo(5, 0);
@@ -543,23 +673,24 @@
     } else if (object.kind === 'memory') {
       const pulse = reducedMotion ? 1 : 1 + Math.sin(elapsed * 3) * .07;
       context.scale(pulse, pulse);
-      const glow = context.createRadialGradient(0, 0, 2, 0, 0, 38);
+      const glow = context.createRadialGradient(0, 0, 2, 0, 0, 48);
       glow.addColorStop(0, 'rgba(255,250,210,.95)');
       glow.addColorStop(.35, 'rgba(241,198,99,.52)');
       glow.addColorStop(1, 'rgba(241,198,99,0)');
       context.fillStyle = glow;
-      context.beginPath(); context.arc(0, 0, 40, 0, Math.PI * 2); context.fill();
+      context.beginPath(); context.arc(0, 0, 49, 0, Math.PI * 2); context.fill();
       context.fillStyle = '#fff4b5';
-      context.beginPath();
-      for (let point = 0; point < 8; point += 1) {
-        const angle = -Math.PI / 2 + point * Math.PI / 4;
-        const radius = point % 2 === 0 ? 19 : 7;
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
-        if (!point) context.moveTo(x, y); else context.lineTo(x, y);
-      }
-      context.closePath(); context.fill();
+      context.shadowColor = '#fff0a7';
+      context.shadowBlur = 20;
+      starPath(0, 0, 22, 9, 5);
+      context.fill();
+      context.fillStyle = '#fffdf0';
+      starPath(-6, -7, 5, 2, 4);
+      context.fill();
     }
+
+    context.shadowBlur = 0;
+    if (object.kind !== 'memory') drawObjectFace(object.kind);
     context.restore();
   }
 
@@ -598,6 +729,39 @@
     context.ellipse(0, radius * .82, radius * .78, radius * .24, 0, 0, Math.PI * 2);
     context.fill();
     context.restore();
+
+    if (creatureImage.complete && creatureImage.naturalWidth) {
+      const aura = context.createRadialGradient(0, 0, radius * .1, 0, 0, radius * 1.75);
+      aura.addColorStop(0, 'rgba(255,210,145,.2)');
+      aura.addColorStop(.55, 'rgba(180,132,233,.13)');
+      aura.addColorStop(1, 'rgba(180,132,233,0)');
+      context.fillStyle = aura;
+      context.beginPath();
+      context.arc(0, 0, radius * 1.8, 0, Math.PI * 2);
+      context.fill();
+
+      context.save();
+      for (let sparkle = 0; sparkle < 5; sparkle += 1) {
+        const angle = elapsed * .45 + sparkle * Math.PI * .4;
+        const orbit = radius * (1.35 + (sparkle % 2) * .22);
+        const x = Math.cos(angle) * orbit;
+        const y = Math.sin(angle) * orbit * .62;
+        context.globalAlpha = .52 + Math.sin(elapsed * 2 + sparkle) * .18;
+        context.fillStyle = sparkle % 2 ? '#ffd77e' : '#ffc1dd';
+        context.shadowColor = context.fillStyle;
+        context.shadowBlur = 10;
+        starPath(x, y, sparkle % 2 ? 3.7 : 2.8, 1.2);
+        context.fill();
+      }
+      context.restore();
+
+      const spriteSize = radius * 4.65;
+      context.shadowColor = 'rgba(241,198,99,.36)';
+      context.shadowBlur = player.chomp > 0 ? 24 : 12;
+      context.drawImage(creatureImage, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
+      context.restore();
+      return;
+    }
 
     context.fillStyle = '#9a83b9';
     context.strokeStyle = 'rgba(255,250,241,.72)';
@@ -655,9 +819,62 @@
       context.save();
       context.globalAlpha = particle.life;
       context.fillStyle = particle.color;
-      context.beginPath(); context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2); context.fill();
+      context.shadowColor = particle.color;
+      context.shadowBlur = 8;
+      if (particle.shape === 'star') {
+        starPath(particle.x, particle.y, particle.size * 1.5, particle.size * .55);
+        context.fill();
+      } else {
+        context.beginPath(); context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2); context.fill();
+      }
       context.restore();
     });
+  }
+
+  function drawPointerTarget() {
+    if (!playing || !pointerTarget) return;
+    const pulse = reducedMotion ? 1 : .9 + Math.sin(elapsed * 5) * .12;
+    context.save();
+    context.translate(pointerTarget.x, pointerTarget.y);
+    context.scale(pulse, pulse);
+    context.strokeStyle = 'rgba(255,245,190,.72)';
+    context.lineWidth = 1.4;
+    context.setLineDash([3, 5]);
+    context.beginPath();
+    context.arc(0, 0, 18, 0, Math.PI * 2);
+    context.stroke();
+    context.setLineDash([]);
+    context.fillStyle = '#fff0a7';
+    context.shadowColor = '#fff0a7';
+    context.shadowBlur = 13;
+    starPath(0, 0, 5, 1.8);
+    context.fill();
+    context.restore();
+  }
+
+  function drawCombo() {
+    if (combo < 2 || comboTimer <= 0) return;
+    const pulse = reducedMotion ? 1 : 1 + Math.sin(comboFlash * Math.PI) * .08;
+    context.save();
+    context.translate(WORLD.width / 2, 58);
+    context.scale(pulse, pulse);
+    context.font = '800 12px "Segoe UI", Arial, sans-serif';
+    const label = `✦  SPARKLE COMBO x${combo}`;
+    const width = context.measureText(label).width + 34;
+    context.fillStyle = 'rgba(255,248,225,.92)';
+    context.strokeStyle = 'rgba(117,75,145,.42)';
+    context.lineWidth = 1.6;
+    context.beginPath();
+    context.roundRect(-width / 2, -18, width, 36, 18);
+    context.fill();
+    context.stroke();
+    context.fillStyle = '#7b4f91';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.shadowColor = 'rgba(255,255,255,.9)';
+    context.shadowBlur = 8;
+    context.fillText(label, 0, 1);
+    context.restore();
   }
 
   function draw() {
@@ -665,8 +882,10 @@
     context.scale(cssWidth / WORLD.width, cssHeight / WORLD.height);
     drawBackground(stages[stageIndex]);
     drawObjects();
+    drawPointerTarget();
     drawEffects();
     drawPlayer();
+    drawCombo();
     context.restore();
   }
 

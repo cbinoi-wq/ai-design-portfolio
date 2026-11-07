@@ -6,9 +6,9 @@
   <meta name="description" content="Play Swallow the Static, Criss Binoi's first interactive game draft about clearing visual noise and protecting one memory.">
   <title>Swallow the Static | Playable Draft · Criss Binoi</title>
   <link rel="stylesheet" href="styles.css?v=14">
-  <link rel="stylesheet" href="game.css?v=3">
+  <link rel="stylesheet" href="game.css?v=5">
   <script src="script.js?v=14" defer></script>
-  <script src="game.js?v=2" defer></script>
+  <script src="game.js?v=4" defer></script>
 </head>
 <body class="game-page" data-page="game">
   <header class="site-header game-header" id="top">
@@ -40,15 +40,20 @@
     </section>
 
     <section class="game-stage-section" id="play" aria-label="Playable game area">
+      <div class="play-heading">
+        <p><span aria-hidden="true">✦</span> Your tiny dream arcade <span aria-hidden="true">✦</span></p>
+        <h2>Help the little dreamer make the city sparkle again.</h2>
+        <p class="play-heading-copy">Gulp the cozy glowing thoughts, skip the wobbly echoes, and save one golden memory.</p>
+      </div>
       <div class="game-frame" id="game-frame">
         <div class="game-hud">
           <div class="hud-stage"><span id="stage-number">STAGE 01</span><strong id="stage-name">Release</strong></div>
           <div class="hud-noise">
-            <span>NOISE</span>
+            <span>DREAM NOISE</span>
             <div class="noise-track" aria-hidden="true"><i id="noise-fill"></i></div>
             <b id="noise-value">100%</b>
           </div>
-          <div class="hud-count"><span>CLEARED</span><strong><b id="cleared-count">0</b>/<b id="cleared-goal">7</b></strong></div>
+          <div class="hud-count"><span>GULPED</span><strong><b id="cleared-count">0</b>/<b id="cleared-goal">7</b></strong></div>
           <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="true" aria-label="Mute game sound"><span aria-hidden="true">♪</span> Sound on</button>
         </div>
 
@@ -56,12 +61,17 @@
           <canvas id="game-canvas" width="960" height="620" aria-label="Swallow the Static game. Move the dream creature into solid objects to clear them."></canvas>
           <div class="game-overlay is-visible" id="game-overlay">
             <div class="overlay-card">
+              <div class="overlay-mascot" aria-hidden="true">
+                <span>✦</span>
+                <img src="assets/swallow-static-creature.png" alt="">
+                <span>✦</span>
+              </div>
               <p class="overlay-step" id="overlay-step">FIRST DRAFT · WEEK 02</p>
               <h2 id="overlay-title">Make some room to breathe.</h2>
-              <p id="overlay-copy">Move the little dream creature into the solid objects. Each one you swallow makes the world a little quieter.</p>
+              <p id="overlay-copy">Guide the little dream creature through the glowing city. Swallow thoughts quickly to make sparkles, build a combo, and quiet the noise.</p>
               <div class="instruction-grid" id="instruction-grid">
                 <div><span aria-hidden="true">↔</span><strong>Move</strong><small>Drag, tap, arrow keys, or WASD</small></div>
-                <div><span aria-hidden="true">●</span><strong>Swallow</strong><small>Touch solid objects to clear them</small></div>
+                <div><span aria-hidden="true">✦</span><strong>Combo</strong><small>Catch glowing objects quickly for extra sparkles</small></div>
                 <div><span aria-hidden="true">◌</span><strong>Notice</strong><small>Flickering double images are false</small></div>
               </div>
               <button class="game-button" id="overlay-button" type="button">Start the game</button>
@@ -72,7 +82,11 @@
         </div>
 
         <div class="game-controls">
-          <p><strong>How to move:</strong> drag or tap inside the game. You can also use arrow keys or WASD.</p>
+          <div class="control-hints" aria-label="Game controls">
+            <span><b aria-hidden="true">↔</b> Drag, tap, or use keys</span>
+            <span><b aria-hidden="true">✦</b> Chase glowing thoughts</span>
+            <span><b aria-hidden="true">◌</b> Skip wobbly echoes</span>
+          </div>
           <button id="restart-game" type="button">Restart</button>
         </div>
       </div>
