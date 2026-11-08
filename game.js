@@ -84,6 +84,12 @@
   let comboTimer = 0;
   let comboFlash = 0;
   let trailTimer = 0;
+  let totalSwallowed = 0;
+  let growthLevel = 0;
+  let growthPulse = 0;
+
+  const BASE_PLAYER_RADIUS = 34;
+  const MAX_PLAYER_RADIUS = 46;
 
   const player = {
     x: WORLD.width * .5,
@@ -98,6 +104,18 @@
   };
 
   const objectKinds = ['note', 'cup', 'phone', 'clock', 'book', 'lamp'];
+
+  function growthRadius() {
+    return Math.min(MAX_PLAYER_RADIUS, BASE_PLAYER_RADIUS + growthLevel * 2.4);
+  }
+
+  function resetGrowth() {
+    totalSwallowed = 0;
+    growthLevel = 0;
+    growthPulse = 0;
+    player.radius = BASE_PLAYER_RADIUS;
+    player.targetRadius = BASE_PLAYER_RADIUS;
+  }
 
   function resizeCanvas() {
     const rect = wrap.getBoundingClientRect();
@@ -173,7 +191,7 @@
     ripples = [];
     player.x = WORLD.width * .5;
     player.y = WORLD.height * .57;
-    player.radius = 34 + index * 4;
+    player.radius = growthRadius();
     player.targetRadius = player.radius;
     player.vx = 0;
     player.vy = 0;
@@ -222,6 +240,7 @@
   }
 
   function beginGame() {
+    resetGrowth();
     buildStage(0);
     hideOverlay();
   }
@@ -335,13 +354,23 @@
     comboTimer = 2.15;
     comboFlash = 1;
     cleared += 1;
+    totalSwallowed += 1;
     noise = Math.max(stageIndex === 2 ? 14 : 8, 100 - (cleared / stages[stageIndex].goal) * (stageIndex === 2 ? 86 : 92));
-    player.targetRadius = Math.min(47, player.targetRadius + 2.2);
+    const nextGrowthLevel = Math.min(5, Math.floor(totalSwallowed / 3));
+    const didGrow = nextGrowthLevel > growthLevel;
+    if (didGrow) {
+      growthLevel = nextGrowthLevel;
+      player.targetRadius = growthRadius();
+      growthPulse = 1;
+      addParticles(player, '#ffc1da', 14);
+    }
     addParticles(object, objectColor(object.kind), Math.min(12, combo * 2));
     playGulp();
     if (combo >= 2) playCombo();
     message.textContent = cleared === stages[stageIndex].goal
       ? (stageIndex === 2 ? 'The city is quiet. Return to the glowing memory.' : 'This part of the city is quiet now.')
+      : didGrow
+        ? 'A little bigger! The dreamer grew with that third gulp. ✦'
       : combo >= 2
         ? `Sparkle combo x${combo}! Keep going!`
         : ['Yum! Chase another glowing thought.', 'The city feels lighter already.', 'A little more room to breathe.'][cleared % 3];
@@ -431,6 +460,7 @@
     bumpCooldown = Math.max(0, bumpCooldown - delta);
     comboTimer = Math.max(0, comboTimer - delta);
     comboFlash = Math.max(0, comboFlash - delta * 2.4);
+    growthPulse = Math.max(0, growthPulse - delta * 1.7);
     if (comboTimer === 0) combo = 0;
     updatePlayer(delta);
 
@@ -716,11 +746,12 @@
     const moving = Math.hypot(player.vx, player.vy);
     const bob = reducedMotion ? 0 : Math.sin(elapsed * 4.2) * 2;
     const squash = player.chomp > 0 ? 1 - Math.sin(player.chomp * Math.PI) * .14 : 1;
+    const growBounce = growthPulse > 0 && !reducedMotion ? 1 + Math.sin((1 - growthPulse) * Math.PI) * .14 : 1;
     const radius = player.radius;
     context.save();
     context.translate(player.x, player.y + bob);
     context.scale(player.facing, 1);
-    context.scale(1 / squash, squash);
+    context.scale(growBounce / squash, growBounce * squash);
 
     context.save();
     context.globalAlpha = .16;
@@ -940,6 +971,7 @@
   });
 
   restartButton.addEventListener('click', () => {
+    resetGrowth();
     buildStage(0);
     showOverlay(
       'FIRST DRAFT · WEEK 02',
