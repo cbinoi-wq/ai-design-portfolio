@@ -470,7 +470,8 @@
     player.radius += (player.targetRadius - player.radius) * Math.min(1, delta * 8);
     player.x = Math.max(player.radius + 9, Math.min(WORLD.width - player.radius - 9, player.x));
     player.y = Math.max(player.radius + 9, Math.min(WORLD.height - player.radius - 9, player.y));
-    player.chomp = Math.max(0, player.chomp - delta * 4);
+    // Keep the swallow reaction long enough to read as two soft chews.
+    player.chomp = Math.max(0, player.chomp - delta * 1.35);
     player.blink += delta;
   }
 
@@ -898,36 +899,80 @@
       context.shadowColor = 'rgba(241,198,99,.36)';
       context.shadowBlur = player.chomp > 0 ? 24 : 12;
       const moveEnergy = Math.min(1, moving / 180);
-      const breath = reducedMotion ? 0 : Math.sin(elapsed * 2.25) * .05;
-      const step = reducedMotion ? 0 : Math.sin(elapsed * 8.4) * (.32 + moveEnergy * .68);
-      const headTilt = reducedMotion ? 0 : Math.sin(elapsed * 2.35) * .075 + Math.max(-.07, Math.min(.07, player.vx * .0002));
-      const earWiggle = reducedMotion ? 0 : Math.sin(elapsed * 5.4) * .105;
-      const chompPop = player.chomp > 0 ? Math.sin(player.chomp * Math.PI) : 0;
+      const breath = reducedMotion ? 0 : Math.sin(elapsed * 2.25) * .035;
+      const step = reducedMotion ? 0 : Math.sin(elapsed * 8.4) * moveEnergy;
+      const travelTilt = reducedMotion ? 0 : Math.max(-.055, Math.min(.055, player.vx * .00016));
+      const chewProgress = player.chomp > 0 ? 1 - player.chomp : 0;
+      const chewWave = player.chomp > 0 && !reducedMotion ? Math.sin(chewProgress * Math.PI * 4) : 0;
+      const chewOpen = player.chomp > 0 ? (chewWave + 1) / 2 : 1;
 
-      const drawCreatureRegion = (xStart, xEnd, yStart, yEnd, pivotX, pivotY, offsetX, offsetY, rotation, scaleX = 1, scaleY = 1) => {
-        const left = -spriteSize / 2 + spriteSize * xStart;
-        const top = -spriteSize / 2 + spriteSize * yStart;
-        const pivotLeft = -spriteSize / 2 + spriteSize * pivotX;
-        const pivotTop = -spriteSize / 2 + spriteSize * pivotY;
+      // Draw the creature exactly once so the silhouette always remains a
+      // single soft character. Squash, stretch, tilt, and bounce animate the
+      // complete body without cutting the illustration into visible pieces.
+      context.save();
+      context.translate(step * 2.2, Math.abs(step) * 1.6 - Math.abs(chewWave) * 2.2);
+      context.rotate(travelTilt + step * .018 + chewWave * .012);
+      context.scale(
+        1 + breath + moveEnergy * .018 + Math.abs(chewWave) * .035,
+        1 - breath * .7 - moveEnergy * .025 - Math.abs(chewWave) * .045
+      );
+      context.drawImage(creatureImage, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
+      context.restore();
+
+      // The original art has open eyes, so soft colored eyelids are drawn over
+      // the exact eye positions for a natural blink every few seconds.
+      const blinkCycle = reducedMotion ? 0 : player.blink % 3.7;
+      const blinkAmount = blinkCycle > 3.34 ? Math.sin(((blinkCycle - 3.34) / .36) * Math.PI) : 0;
+      if (blinkAmount > 0) {
+        const lidGradient = context.createLinearGradient(0, -spriteSize * .24, 0, -spriteSize * .08);
+        lidGradient.addColorStop(0, '#d07ab6');
+        lidGradient.addColorStop(1, '#9c5aaa');
+        const drawEyelid = (x, y, rx, ry, rotation) => {
+          context.save();
+          context.translate(x, y);
+          context.rotate(rotation);
+          context.fillStyle = lidGradient;
+          context.strokeStyle = 'rgba(70,35,72,.86)';
+          context.lineWidth = Math.max(1.2, spriteSize * .012);
+          context.beginPath();
+          context.ellipse(0, 0, rx, Math.max(1, ry * blinkAmount), 0, 0, Math.PI * 2);
+          context.fill();
+          if (blinkAmount > .55) {
+            context.beginPath();
+            context.moveTo(-rx * .8, 0);
+            context.quadraticCurveTo(0, ry * .35, rx * .8, 0);
+            context.stroke();
+          }
+          context.restore();
+        };
+        drawEyelid(spriteSize * .02, -spriteSize * .158, spriteSize * .075, spriteSize * .066, -.07);
+        drawEyelid(spriteSize * .222, -spriteSize * .197, spriteSize * .065, spriteSize * .06, -.24);
+      }
+
+      // During a swallow, redraw the mouth as it closes and opens twice. This
+      // produces a clear chewing expression while keeping the body unified.
+      if (player.chomp > 0) {
+        const mouthX = spriteSize * .166;
+        const mouthY = -spriteSize * .088;
+        const mouthHeight = spriteSize * (.008 + chewOpen * .036);
         context.save();
+        context.translate(mouthX, mouthY);
+        context.rotate(.08);
+        context.fillStyle = '#542542';
+        context.strokeStyle = 'rgba(62,25,54,.88)';
+        context.lineWidth = Math.max(1, spriteSize * .009);
         context.beginPath();
-        context.rect(left - 3, top - 3, spriteSize * (xEnd - xStart) + 6, spriteSize * (yEnd - yStart) + 6);
-        context.clip();
-        context.translate(pivotLeft + offsetX, pivotTop + offsetY);
-        context.rotate(rotation);
-        context.scale(scaleX, scaleY);
-        context.translate(-pivotLeft, -pivotTop);
-        context.drawImage(creatureImage, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
+        context.ellipse(0, 0, spriteSize * .048, mouthHeight, 0, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        if (chewOpen > .46) {
+          context.fillStyle = '#f2707f';
+          context.beginPath();
+          context.ellipse(0, mouthHeight * .45, spriteSize * .025, mouthHeight * .3, 0, 0, Math.PI * 2);
+          context.fill();
+        }
         context.restore();
-      };
-
-      // The character is rebuilt from independently moving regions. The ears
-      // wiggle, the head tilts, the body breathes, and the feet dangle.
-      drawCreatureRegion(0, 1, .67, 1, .5, .69, step * 4.8, Math.abs(step) * 3.1, -step * .038, 1 + moveEnergy * .025, 1 - moveEnergy * .04);
-      drawCreatureRegion(0, 1, .4, .7, .5, .55, -step * 1.6, -breath * radius * .45, step * .018, 1 + breath + chompPop * .06, 1 - breath * .72 - chompPop * .04);
-      drawCreatureRegion(.08, .49, 0, .38, .33, .22, -2 - earWiggle * 12, -Math.abs(earWiggle) * 5, -earWiggle - .025, 1, 1 + Math.abs(earWiggle) * .18);
-      drawCreatureRegion(.53, .96, 0, .37, .72, .2, 2 + earWiggle * 11, -Math.abs(earWiggle) * 4, earWiggle * .86 + .022, 1, 1 + Math.abs(earWiggle) * .16);
-      drawCreatureRegion(.22, .86, .19, .46, .54, .34, step * .9, -Math.abs(step) * 2.2 - chompPop * 5, headTilt, 1 + chompPop * .075, 1 - chompPop * .04);
+      }
       context.restore();
       return;
     }
