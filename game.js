@@ -29,6 +29,10 @@
   creatureImage.src = 'assets/swallow-static-creature.png?v=1';
   const creatureSpriteImage = new Image();
   creatureSpriteImage.src = 'assets/swallow-static-creature-sprites-v2.png?v=1';
+  const dreamMusic = new Audio('assets/dream-melody.wav?v=2');
+  dreamMusic.loop = true;
+  dreamMusic.preload = 'auto';
+  dreamMusic.volume = .48;
 
   const WORLD = { width: 960, height: 620 };
   const MAX_WORLD_WIDTH = 1700;
@@ -39,7 +43,7 @@
       name: 'Release',
       goal: 7,
       echoes: 3,
-      message: 'Three fake thoughts are already hiding here. They look swallowable—until you touch them.',
+      message: 'Three shimmering copies are already here. They wobble like real thoughts, but refuse to be swallowed.',
       colors: ['#c8d8d4', '#e8d2cb'],
       intro: 'Start with what feels manageable.',
       copy: 'The dreamer begins tiny. Swallow real thoughts to grow, but three identical-looking copies are already hiding in this first stage.'
@@ -82,6 +86,10 @@
   let elapsed = 0;
   let audioEnabled = true;
   let audioContext = null;
+  let musicTimer = null;
+  let musicStarting = false;
+  let musicStep = 0;
+  let musicBus = null;
   let completionReady = false;
   let bumpCooldown = 0;
   let objectId = 0;
@@ -97,6 +105,7 @@
   const BASE_PLAYER_RADIUS = 26;
   const MAX_PLAYER_RADIUS = 54;
   const PLAYER_VISUAL_MARGIN_FACTOR = 2.55;
+  const DREAM_MELODY = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 783.99, 659.25, 587.33, 523.25, 392];
 
   const player = {
     x: WORLD.width * .5,
@@ -262,7 +271,7 @@
     overlay.classList.remove('is-visible');
     playing = true;
     lastTime = performance.now();
-    ensureAudio();
+    startDreamMusic();
     // Starting any stage restores the entire HUD, board, and controls to view,
     // even if the player scrolled inside the instruction card to reach Start.
     window.requestAnimationFrame(() => {
@@ -304,11 +313,12 @@
   }
 
   function ensureAudio() {
-    if (!audioEnabled) return;
+    if (!audioEnabled) return Promise.resolve(null);
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
+    if (!AudioContext) return Promise.resolve(null);
     if (!audioContext) audioContext = new AudioContext();
-    if (audioContext.state === 'suspended') audioContext.resume();
+    if (audioContext.state === 'suspended') return audioContext.resume().then(() => audioContext);
+    return Promise.resolve(audioContext);
   }
 
   function tone(startFrequency, endFrequency, duration, volume, type = 'sine', delay = 0) {
@@ -329,6 +339,97 @@
     gain.connect(audioContext.destination);
     oscillator.start(now);
     oscillator.stop(now + duration + .03);
+  }
+
+  function playDreamMusicNote() {
+    if (!audioEnabled || !playing || !audioContext || audioContext.state !== 'running' || !musicBus) return;
+    const frequency = DREAM_MELODY[musicStep % DREAM_MELODY.length];
+    const now = audioContext.currentTime + .025;
+    const duration = .82;
+    const lead = audioContext.createOscillator();
+    const leadGain = audioContext.createGain();
+    lead.type = 'sine';
+    lead.frequency.setValueAtTime(frequency, now);
+    leadGain.gain.setValueAtTime(.0001, now);
+    leadGain.gain.exponentialRampToValueAtTime(.046, now + .08);
+    leadGain.gain.exponentialRampToValueAtTime(.0001, now + duration);
+    lead.connect(leadGain);
+    leadGain.connect(musicBus);
+    lead.start(now);
+    lead.stop(now + duration + .04);
+
+    if (musicStep % 4 === 0) {
+      const bass = audioContext.createOscillator();
+      const bassGain = audioContext.createGain();
+      bass.type = 'triangle';
+      bass.frequency.setValueAtTime(frequency / 2, now);
+      bassGain.gain.setValueAtTime(.0001, now);
+      bassGain.gain.exponentialRampToValueAtTime(.019, now + .11);
+      bassGain.gain.exponentialRampToValueAtTime(.0001, now + 1.05);
+      bass.connect(bassGain);
+      bassGain.connect(musicBus);
+      bass.start(now);
+      bass.stop(now + 1.1);
+    }
+    musicStep += 1;
+  }
+
+  function startSynthDreamMusic() {
+    if (!audioEnabled || musicTimer || musicStarting) return;
+    musicStarting = true;
+    ensureAudio().then((activeContext) => {
+      musicStarting = false;
+      if (!audioEnabled || !activeContext || musicTimer) return;
+      if (!musicBus) {
+        musicBus = activeContext.createGain();
+        musicBus.gain.setValueAtTime(.82, activeContext.currentTime);
+        musicBus.connect(activeContext.destination);
+      } else {
+        musicBus.gain.cancelScheduledValues(activeContext.currentTime);
+        musicBus.gain.setTargetAtTime(.82, activeContext.currentTime, .035);
+      }
+      playDreamMusicNote();
+      musicTimer = window.setInterval(playDreamMusicNote, 540);
+      soundToggle.classList.add('is-playing');
+      soundToggle.dataset.musicState = 'playing';
+    });
+  }
+
+  function markMusicPlaying() {
+    musicStarting = false;
+    soundToggle.classList.add('is-playing');
+    soundToggle.dataset.musicState = 'playing';
+  }
+
+  function startDreamMusic() {
+    if (!audioEnabled || musicStarting) return;
+    if (!dreamMusic.paused) {
+      markMusicPlaying();
+      return;
+    }
+    musicStarting = true;
+    const playAttempt = dreamMusic.play();
+    if (playAttempt && typeof playAttempt.then === 'function') {
+      playAttempt.then(markMusicPlaying).catch(() => {
+        musicStarting = false;
+        startSynthDreamMusic();
+      });
+    } else {
+      markMusicPlaying();
+    }
+  }
+
+  function stopDreamMusic() {
+    dreamMusic.pause();
+    if (musicTimer) window.clearInterval(musicTimer);
+    musicTimer = null;
+    musicStarting = false;
+    soundToggle.classList.remove('is-playing');
+    soundToggle.dataset.musicState = 'stopped';
+    if (audioContext && musicBus) {
+      musicBus.gain.cancelScheduledValues(audioContext.currentTime);
+      musicBus.gain.setTargetAtTime(.0001, audioContext.currentTime, .025);
+    }
   }
 
   function playGulp() {
@@ -662,14 +763,19 @@
       context.lineCap = 'round';
       for (let trail = 0; trail < 5; trail += 1) {
         const drift = Math.sin(elapsed * .38 + trail * 1.6) * 24;
-        context.globalAlpha = .08 + trail * .012;
+        context.globalAlpha = .16 + trail * .018;
         context.strokeStyle = trail % 2 ? '#ffd58a' : '#d49bff';
-        context.lineWidth = 1.2 + trail * .3;
+        context.lineWidth = 1.5 + trail * .35;
+        context.setLineDash([2, 12]);
+        context.lineDashOffset = -elapsed * (22 + trail * 4);
+        context.shadowColor = context.strokeStyle;
+        context.shadowBlur = 9;
         context.beginPath();
         context.moveTo(-80, WORLD.height * (.33 + trail * .1) + drift);
         context.bezierCurveTo(WORLD.width * .22, WORLD.height * (.2 + trail * .11), WORLD.width * .7, WORLD.height * (.56 + trail * .045), WORLD.width + 90, WORLD.height * (.38 + trail * .08) - drift);
         context.stroke();
       }
+      context.setLineDash([]);
       context.restore();
     }
 
@@ -678,41 +784,41 @@
     context.globalCompositeOperation = 'screen';
     for (let index = 0; index < 34; index += 1) {
       const travelWidth = WORLD.width + 80;
-      const speed = 8 + (index % 6) * 3.2;
+      const speed = 30 + (index % 6) * 7.5;
       const x = ((index * 173 + 79 + elapsed * speed) % travelWidth) - 40;
       const baseY = (index * 97 + 55) % WORLD.height;
       const y = baseY + Math.sin(elapsed * (.85 + (index % 3) * .14) + index * 1.7) * 19;
-      const alpha = .24 + (Math.sin(elapsed * 2.1 + index) + 1) * .18;
+      const alpha = .42 + (Math.sin(elapsed * 2.1 + index) + 1) * .19;
       context.globalAlpha = alpha;
       context.fillStyle = index % 4 === 0 ? '#9ee9eb' : '#ffd97c';
       context.shadowColor = context.fillStyle;
-      context.shadowBlur = 15;
-      if (index % 5 === 0) starPath(x, y, 4.2, 1.25);
+      context.shadowBlur = 18;
+      if (index % 5 === 0) starPath(x, y, 5.2, 1.55);
       else {
         context.beginPath();
-        context.arc(x, y, index % 3 === 0 ? 2.8 : 1.7, 0, Math.PI * 2);
+        context.arc(x, y, index % 3 === 0 ? 3.4 : 2.2, 0, Math.PI * 2);
       }
       context.fill();
     }
 
     // A handful of bright wisps visibly cross the plaza behind the objects.
-    for (let wisp = 0; wisp < 4; wisp += 1) {
-      const progress = ((elapsed * (42 + wisp * 7) + wisp * 230) % (WORLD.width + 260)) - 130;
-      const wispY = WORLD.height * (.18 + wisp * .19) + Math.sin(elapsed * .8 + wisp) * 22;
+    for (let wisp = 0; wisp < 6; wisp += 1) {
+      const progress = ((elapsed * (78 + wisp * 9) + wisp * 230) % (WORLD.width + 260)) - 130;
+      const wispY = WORLD.height * (.12 + wisp * .15) + Math.sin(elapsed * .8 + wisp) * 22;
       const tail = context.createLinearGradient(progress - 70, wispY, progress + 8, wispY);
       tail.addColorStop(0, 'rgba(255,213,138,0)');
-      tail.addColorStop(1, wisp % 2 ? 'rgba(158,233,235,.48)' : 'rgba(255,213,138,.52)');
-      context.globalAlpha = .7;
+      tail.addColorStop(1, wisp % 2 ? 'rgba(158,233,235,.72)' : 'rgba(255,213,138,.76)');
+      context.globalAlpha = .88;
       context.strokeStyle = tail;
-      context.lineWidth = 2;
+      context.lineWidth = 2.8;
       context.beginPath();
-      context.moveTo(progress - 70, wispY + 9);
+      context.moveTo(progress - 92, wispY + 12);
       context.quadraticCurveTo(progress - 28, wispY - 12, progress, wispY);
       context.stroke();
       context.fillStyle = wisp % 2 ? '#9ee9eb' : '#ffd58a';
       context.shadowColor = context.fillStyle;
-      context.shadowBlur = 18;
-      starPath(progress, wispY, 5, 1.5);
+      context.shadowBlur = 24;
+      starPath(progress, wispY, 7, 2);
       context.fill();
     }
     context.restore();
@@ -857,14 +963,34 @@
           context.fillText('FALSE ECHO', object.x, object.y - object.radius - 27);
           context.restore();
         } else {
-          // Before contact, a hallucination deliberately passes as a real object.
+          // Before contact, a hallucination still looks swallowable, but its
+          // persistent split aura makes the visual lie readable from Stage 1.
           drawObjectShape(object, .98, 0);
-          const tell = reducedMotion ? -1 : Math.sin(elapsed * .72 + object.phase);
-          if (tell > .91) {
-            const whisper = (tell - .91) / .09;
-            drawObjectShape(object, whisper * .12, -3);
-            drawObjectShape(object, whisper * .1, 3);
+          const pulse = reducedMotion ? .45 : (Math.sin(elapsed * 3.2 + object.phase) + 1) / 2;
+          const separation = 2.5 + pulse * 3;
+          drawObjectShape(object, .1 + pulse * .1, -separation);
+          drawObjectShape(object, .08 + (1 - pulse) * .11, separation);
+          context.save();
+          context.globalCompositeOperation = 'screen';
+          context.globalAlpha = .18 + pulse * .14;
+          context.strokeStyle = pulse > .5 ? '#ffc1dd' : '#9ee9eb';
+          context.lineWidth = 1.4;
+          context.setLineDash([2, 7]);
+          context.lineDashOffset = -elapsed * 18;
+          context.shadowColor = context.strokeStyle;
+          context.shadowBlur = 10;
+          context.beginPath();
+          context.arc(object.x, object.y, object.radius + 25 + pulse * 3, 0, Math.PI * 2);
+          context.stroke();
+          for (let mote = 0; mote < 3; mote += 1) {
+            const angle = elapsed * (1.2 + mote * .18) + object.phase + mote * Math.PI * .66;
+            const orbit = object.radius + 29 + mote * 3;
+            context.fillStyle = mote % 2 ? '#ffc1dd' : '#9ee9eb';
+            context.beginPath();
+            context.arc(object.x + Math.cos(angle) * orbit, object.y + Math.sin(angle) * orbit, 2.2, 0, Math.PI * 2);
+            context.fill();
           }
+          context.restore();
         }
       } else {
         drawObjectShape(object, 1);
@@ -1157,9 +1283,14 @@
   soundToggle.addEventListener('click', () => {
     audioEnabled = !audioEnabled;
     soundToggle.setAttribute('aria-pressed', String(audioEnabled));
-    soundToggle.setAttribute('aria-label', audioEnabled ? 'Mute game sound' : 'Turn on game sound');
-    soundToggle.innerHTML = `<span aria-hidden="true">♪</span> Sound ${audioEnabled ? 'on' : 'off'}`;
-    if (audioEnabled) playEcho();
+    soundToggle.setAttribute('aria-label', audioEnabled ? 'Mute dream music' : 'Turn on dream music');
+    soundToggle.innerHTML = `<span aria-hidden="true">♪</span> Music ${audioEnabled ? 'on' : 'off'}`;
+    if (audioEnabled) {
+      startDreamMusic();
+      playEcho();
+    } else {
+      stopDreamMusic();
+    }
   });
 
   restartButton.addEventListener('click', () => {
@@ -1168,10 +1299,15 @@
     showOverlay(
       INTRO_STEP,
       'Make some room to breathe.',
-      'Guide the little dreamer through the living city. Real thoughts help it grow, but some thoughts may only be copies.',
-      'Start the game',
+      'Guide the little dreamer through the living city. Shimmering copies appear immediately, and the dream melody begins when you press Start.',
+      'Start game + music',
       beginGame
     );
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopDreamMusic();
+    else if (playing && audioEnabled) startDreamMusic();
   });
 
   window.addEventListener('resize', resizeCanvas);

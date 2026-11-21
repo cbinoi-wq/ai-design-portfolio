@@ -175,6 +175,7 @@
 .sound-toggle { padding: 10px 14px; border: 1px solid rgba(255,234,194,.34); border-radius: 99px; color: var(--game-paper); background: rgba(255,250,241,.065); font: 750 10px var(--sans); cursor: pointer; }
 .sound-toggle:hover, .sound-toggle:focus-visible { border-color: rgba(255,226,166,.72); background: rgba(255,250,241,.13); }
 .sound-toggle[aria-pressed="false"] { color: rgba(255,250,241,.5); }
+.sound-toggle.is-playing { border-color: rgba(255,225,166,.72); animation: musicPulse 1.8s ease-in-out infinite; }
 
 .canvas-wrap { position: relative; width: 100%; aspect-ratio: 48 / 31; min-height: 360px; overflow: hidden; border-bottom: 1px solid rgba(255,229,177,.18); background: #17142f; }
 #game-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath fill='%23fff2ad' stroke='%236c4a85' stroke-width='1.5' d='m14 1 2.7 9.8L27 14l-10.3 3.2L14 27l-2.7-9.8L1 14l10.3-3.2z'/%3E%3C/svg%3E") 14 14, crosshair; }
@@ -214,12 +215,13 @@
 
 @keyframes mascotBob { 50% { transform: translateY(-5px) rotate(2deg) scale(1.035,.97); } }
 @keyframes mascotTwinkle { 50% { opacity: .4; transform: scale(.75) rotate(25deg); } }
+@keyframes musicPulse { 50% { background: rgba(255,217,166,.14); box-shadow: 0 0 18px rgba(255,210,151,.28); transform: translateY(-1px); } }
 
 /* On laptops, size the complete game frame from the usable viewport height.
    The 48:31 playfield, HUD, and controls now fit together without scrolling. */
 @media (min-width: 761px) {
   .game-stage-section { padding-inline: clamp(10px, 2vw, 32px); }
-  .game-frame { width: 100%; }
+  .game-frame { width: min(88vw, 1600px); max-width: 1600px; }
   .canvas-wrap { height: calc(100dvh - 170px); min-height: 0; aspect-ratio: auto; }
 }
 
@@ -335,5 +337,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .game-overlay, .noise-track i, .game-button { transition: none; }
-  .overlay-mascot img, .overlay-mascot span { animation: none; }
+  .overlay-mascot img, .overlay-mascot span, .sound-toggle.is-playing { animation: none; }
 }
