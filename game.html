@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Play Swallow the Static, Criss Binoi's first interactive game draft about clearing visual noise and protecting one memory.">
-  <title>Swallow the Static | Playable Draft · Criss Binoi</title>
+  <meta name="description" content="Play Swallow the Static, Criss Binoi's final Hallucination web game about swallowing real thoughts, exposing false echoes, and protecting one memory.">
+  <title>Swallow the Static | Final Game · Criss Binoi</title>
   <link rel="stylesheet" href="styles.css?v=14">
-  <link rel="stylesheet" href="game.css?v=5">
+  <link rel="stylesheet" href="game.css?v=7">
   <script src="script.js?v=14" defer></script>
-  <script src="game.js?v=5" defer></script>
+  <script src="game.js?v=7" defer></script>
 </head>
 <body class="game-page" data-page="game">
   <header class="site-header game-header" id="top">
@@ -23,16 +23,16 @@
   <main>
     <section class="game-intro" aria-labelledby="game-title">
       <div class="game-intro-copy">
-        <p class="game-kicker">Hallucination · Interactive game · First draft</p>
+        <p class="game-kicker">Hallucination · Interactive game · Final version</p>
         <h1 id="game-title">SWALLOW<br><em>THE STATIC.</em></h1>
-        <p class="cover-lede">A tiny dream creature is surrounded by thoughts that feel too loud. Clear the solid clutter, notice what is only an echo, and protect the one memory that should remain.</p>
+        <p class="cover-lede">A tiny dream creature is surrounded by thoughts that feel too loud. Swallow what is real, expose the copies, and protect the one memory that should remain.</p>
         <div class="cover-actions">
           <a class="cover-button cover-button-primary" href="#play">Play the game</a>
           <a class="cover-button" href="game-proposal.html">View the proposal</a>
         </div>
         <div class="game-intro-note" aria-label="Game details">
           <span>3 short stages</span>
-          <span>About 2 minutes</span>
+          <span>About 3 minutes</span>
           <span>Touch, mouse, or keys</span>
         </div>
       </div>
@@ -43,7 +43,7 @@
       <div class="play-heading">
         <p><span aria-hidden="true">✦</span> Your tiny dream arcade <span aria-hidden="true">✦</span></p>
         <h2>Help the little dreamer make the city sparkle again.</h2>
-        <p class="play-heading-copy">Gulp the cozy glowing thoughts, skip the wobbly echoes, and save one golden memory.</p>
+        <p class="play-heading-copy">Find what is real, learn which thoughts are lying, and save one golden memory.</p>
       </div>
       <div class="game-frame" id="game-frame">
         <div class="game-hud">
@@ -54,6 +54,10 @@
             <b id="noise-value">100%</b>
           </div>
           <div class="hud-count"><span>GULPED</span><strong><b id="cleared-count">0</b>/<b id="cleared-goal">7</b></strong></div>
+          <div class="hud-growth" aria-label="Creature growth, zero of five">
+            <span>GROWTH</span>
+            <div class="growth-pips" id="growth-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
           <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="true" aria-label="Mute game sound"><span aria-hidden="true">♪</span> Sound on</button>
         </div>
 
@@ -66,13 +70,13 @@
                 <img src="assets/swallow-static-creature.png" alt="">
                 <span>✦</span>
               </div>
-              <p class="overlay-step" id="overlay-step">FIRST DRAFT · WEEK 02</p>
+              <p class="overlay-step" id="overlay-step">FINAL GAME · WEEK 03</p>
               <h2 id="overlay-title">Make some room to breathe.</h2>
-              <p id="overlay-copy">Guide the little dream creature through the glowing city. Swallow thoughts quickly to make sparkles, build a combo, and quiet the noise.</p>
+              <p id="overlay-copy">Guide the tiny dream creature through the living city. Fake thoughts are hiding from Stage 1, and every third real thought makes the creature noticeably bigger.</p>
               <div class="instruction-grid" id="instruction-grid">
                 <div><span aria-hidden="true">↔</span><strong>Move</strong><small>Drag, tap, arrow keys, or WASD</small></div>
-                <div><span aria-hidden="true">✦</span><strong>Combo</strong><small>Catch glowing objects quickly for extra sparkles</small></div>
-                <div><span aria-hidden="true">◌</span><strong>Notice</strong><small>Flickering double images are false</small></div>
+                <div><span aria-hidden="true">✦</span><strong>Grow</strong><small>Start tiny; every third real thought increases your size</small></div>
+                <div><span aria-hidden="true">◌</span><strong>Doubt</strong><small>Copies look swallowable from Stage 1, but cannot be eaten</small></div>
               </div>
               <button class="game-button" id="overlay-button" type="button">Start the game</button>
               <a class="overlay-link" id="overlay-link" href="game-proposal.html">Read the original proposal</a>
@@ -84,33 +88,47 @@
         <div class="game-controls">
           <div class="control-hints" aria-label="Game controls">
             <span><b aria-hidden="true">↔</b> Drag, tap, or use keys</span>
-            <span><b aria-hidden="true">✦</b> Chase glowing thoughts</span>
-            <span><b aria-hidden="true">◌</b> Skip wobbly echoes</span>
+            <span><b aria-hidden="true">✦</b> Real thoughts help you grow</span>
+            <span><b aria-hidden="true">◌</b> Copies reveal themselves on touch</span>
           </div>
           <button id="restart-game" type="button">Restart</button>
         </div>
       </div>
     </section>
 
-    <section class="draft-notes" aria-labelledby="draft-title">
-      <div>
-        <p class="game-kicker">Week 2 · What I built</p>
-        <h2 id="draft-title">A playable test of the main feeling.</h2>
+    <section class="process-notes" aria-labelledby="process-title">
+      <header class="process-heading">
+        <p class="game-kicker">Week 3 · Test, refine, and publish</p>
+        <h2 id="process-title">From a static draft to a living dream.</h2>
+        <p>This final pass focused on making growth, deception, and movement readable without losing the soft visual style.</p>
+      </header>
+
+      <div class="process-grid">
+        <article class="process-card">
+          <span>01</span>
+          <h3>Feedback I focused on</h3>
+          <p>Playtesters liked the cute creature, but its growth was hard to notice. The false objects appeared too late, and both the character and city felt too static.</p>
+        </article>
+        <article class="process-card">
+          <span>02</span>
+          <h3>What changed</h3>
+          <p>False copies now appear in Stage 1 and disguise themselves until touched. The creature grows in five visible steps, animates while idle and moving, and the city now drifts, glows, and shimmers.</p>
+        </article>
+        <article class="process-card">
+          <span>03</span>
+          <h3>AI and my decisions</h3>
+          <p>I used ChatGPT to help refine the canvas animation, interaction code, responsive layout, and testing. I chose the concept, rules, visual direction, pacing, feedback priorities, and final design edits.</p>
+        </article>
       </div>
-      <div class="draft-copy">
-        <p>This first draft tests the main loop from my proposal: move, swallow, grow, and make visual noise disappear. The hallucination theme appears through objects that flicker, split into double images, and dissolve without helping the player grow.</p>
-        <p>The final stage changes the goal. Instead of erasing everything, the player leaves one glowing memory in the quiet city. This tests whether the game can feel satisfying while still ending with a small choice about what deserves to remain.</p>
+
+      <div class="revision-strip" aria-label="Before and after summary">
+        <p><small>BEFORE</small> Static character · obvious late echoes · still background</p>
+        <span aria-hidden="true">→</span>
+        <p><small>AFTER</small> Visible growth · deceptive copies from Stage 1 · animated dream city</p>
       </div>
-      <div class="feedback-card">
-        <p class="game-kicker">Questions for playtesters</p>
-        <ol>
-          <li>Was it clear which objects were real and which were hallucinated echoes?</li>
-          <li>Did moving and swallowing objects feel satisfying?</li>
-          <li>Did the final protected memory make sense without a long explanation?</li>
-        </ol>
-      </div>
-      <div class="draft-links">
-        <a href="game-proposal.html">View the Week 1 proposal <span aria-hidden="true">↗</span></a>
+
+      <div class="draft-links process-links">
+        <a href="game-proposal.html">View the original proposal <span aria-hidden="true">↗</span></a>
         <a href="index.html">Return to the portfolio <span aria-hidden="true">↗</span></a>
       </div>
     </section>

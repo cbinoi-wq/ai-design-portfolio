@@ -18,6 +18,7 @@
   const noiseValue = document.querySelector('#noise-value');
   const clearedCount = document.querySelector('#cleared-count');
   const clearedGoal = document.querySelector('#cleared-goal');
+  const growthPips = document.querySelector('#growth-pips');
   const soundToggle = document.querySelector('#sound-toggle');
   const restartButton = document.querySelector('#restart-game');
 
@@ -28,24 +29,25 @@
 
   const WORLD = { width: 960, height: 620 };
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const INTRO_STEP = 'FINAL GAME · WEEK 03';
   const stages = [
     {
       name: 'Release',
       goal: 7,
-      echoes: 0,
-      message: 'Chase the glowing thoughts. Swallow them quickly for a sparkle combo!',
+      echoes: 3,
+      message: 'Three fake thoughts are already hiding here. They look swallowable—until you touch them.',
       colors: ['#c8d8d4', '#e8d2cb'],
       intro: 'Start with what feels manageable.',
-      copy: 'Move into the solid objects. Every gentle gulp makes the world quieter and helps the creature grow.'
+      copy: 'The dreamer begins tiny. Swallow real thoughts to grow, but three identical-looking copies are already hiding in this first stage.'
     },
     {
       name: 'Doubt',
       goal: 8,
       echoes: 5,
-      message: 'Flickering double images are only echoes.',
+      message: 'The copies are getting restless. Trust what the city does, not only what you see.',
       colors: ['#c8c7d9', '#b8d8d3'],
       intro: 'The city begins to copy itself.',
-      copy: 'Some objects now flicker and split into double images. They are hallucinated echoes, so touching them gives no growth.'
+      copy: 'The city now lies more often. False thoughts may briefly slip out of alignment, but only touching one reveals the truth.'
     },
     {
       name: 'Remember',
@@ -88,14 +90,14 @@
   let growthLevel = 0;
   let growthPulse = 0;
 
-  const BASE_PLAYER_RADIUS = 34;
-  const MAX_PLAYER_RADIUS = 46;
+  const BASE_PLAYER_RADIUS = 26;
+  const MAX_PLAYER_RADIUS = 54;
 
   const player = {
     x: WORLD.width * .5,
     y: WORLD.height * .57,
-    radius: 34,
-    targetRadius: 34,
+    radius: BASE_PLAYER_RADIUS,
+    targetRadius: BASE_PLAYER_RADIUS,
     vx: 0,
     vy: 0,
     chomp: 0,
@@ -106,7 +108,7 @@
   const objectKinds = ['note', 'cup', 'phone', 'clock', 'book', 'lamp'];
 
   function growthRadius() {
-    return Math.min(MAX_PLAYER_RADIUS, BASE_PLAYER_RADIUS + growthLevel * 2.4);
+    return Math.min(MAX_PLAYER_RADIUS, BASE_PLAYER_RADIUS + growthLevel * ((MAX_PLAYER_RADIUS - BASE_PLAYER_RADIUS) / 5));
   }
 
   function resetGrowth() {
@@ -172,7 +174,9 @@
       rotation: random(-.35, .35),
       phase: random(0, Math.PI * 2),
       scale: 1,
-      removing: false
+      removing: false,
+      revealed: false,
+      glitch: 0
     };
   }
 
@@ -217,6 +221,10 @@
     clearedGoal.textContent = String(stage.goal);
     noiseValue.textContent = `${Math.round(noise)}%`;
     noiseFill.style.width = `${noise}%`;
+    if (growthPips) {
+      growthPips.querySelectorAll('i').forEach((pip, index) => pip.classList.toggle('is-on', index < growthLevel));
+      growthPips.parentElement?.setAttribute('aria-label', `Creature growth, ${growthLevel} of 5`);
+    }
   }
 
   function showOverlay(step, title, copy, buttonText, action, final = false) {
@@ -225,8 +233,8 @@
     overlayCopy.textContent = copy;
     overlayButton.textContent = buttonText;
     overlayButton.onclick = action;
-    instructionGrid.hidden = step !== 'FIRST DRAFT · WEEK 02';
-    overlayLink.hidden = !final && step !== 'FIRST DRAFT · WEEK 02';
+    instructionGrid.hidden = step !== INTRO_STEP;
+    overlayLink.hidden = !final && step !== INTRO_STEP;
     overlayLink.textContent = final ? 'Read the original proposal' : 'Read the original proposal';
     overlay.classList.add('is-visible');
     playing = false;
@@ -262,9 +270,9 @@
   function finishGame() {
     playFinishSound();
     showOverlay(
-      'FIRST DRAFT COMPLETE',
+      'THE DREAM IS QUIET',
       'Quiet does not have to mean empty.',
-      'You cleared the visual noise and left one memory glowing in the city. Thank you for testing this early version of Swallow the Static.',
+      'You exposed the false thoughts, swallowed what was real, and left one memory glowing in the city. The dreamer can finally rest.',
       'Play again',
       beginGame,
       true
@@ -370,7 +378,7 @@
     message.textContent = cleared === stages[stageIndex].goal
       ? (stageIndex === 2 ? 'The city is quiet. Return to the glowing memory.' : 'This part of the city is quiet now.')
       : didGrow
-        ? 'A little bigger! The dreamer grew with that third gulp. ✦'
+        ? `Growth ${growthLevel}/5! The tiny dreamer is visibly bigger now. ✦`
       : combo >= 2
         ? `Sparkle combo x${combo}! Keep going!`
         : ['Yum! Chase another glowing thought.', 'The city feels lighter already.', 'A little more room to breathe.'][cleared % 3];
@@ -388,13 +396,25 @@
   }
 
   function touchEcho(object) {
-    if (object.removing || bumpCooldown > 0) return;
-    object.removing = true;
-    bumpCooldown = .35;
-    noise = Math.min(100, noise + 6);
-    addParticles(object, '#9bc8d0');
+    if (object.removing || object.revealed || bumpCooldown > 0) return;
+    object.revealed = true;
+    object.glitch = 1;
+    bumpCooldown = .6;
+    const fallbackX = player.facing || 1;
+    const awayX = player.x - object.x;
+    const awayY = player.y - object.y;
+    const awayLength = Math.hypot(awayX, awayY) || 1;
+    const normalX = awayLength > 2 ? awayX / awayLength : fallbackX;
+    const normalY = awayLength > 2 ? awayY / awayLength : -.25;
+    player.x += normalX * 34;
+    player.y += normalY * 34;
+    player.vx = normalX * 90;
+    player.vy = normalY * 90;
+    noise = Math.min(100, noise + 8);
+    addParticles(object, '#7ed7d1', 9);
+    addParticles(object, '#ff8f9f', 7);
     playEcho();
-    message.textContent = 'Only an echo. It looked real, but it gave no growth.';
+    message.textContent = 'Fake thought! It looked swallowable, but the dreamer cannot eat it.';
     updateHud();
   }
 
@@ -485,7 +505,12 @@
         object.scale -= delta * 4.5;
         return;
       }
-      if (distance(player, object) < player.radius * .72 + object.radius + 11) {
+      if (object.revealed && object.glitch > 0) {
+        object.glitch = Math.max(0, object.glitch - delta * .52);
+        if (object.glitch === 0) object.removing = true;
+        return;
+      }
+      if (!object.revealed && distance(player, object) < player.radius * .72 + object.radius + 11) {
         if (object.type === 'solid') consumeObject(object);
         else if (object.type === 'echo') touchEcho(object);
         else touchMemory(object);
@@ -571,6 +596,12 @@
         sourceHeight = sourceWidth / worldRatio;
         sourceY = (gameBoardImage.naturalHeight - sourceHeight) / 2;
       }
+      if (!reducedMotion) {
+        const horizontalRoom = Math.max(0, (gameBoardImage.naturalWidth - sourceWidth) / 2);
+        const verticalRoom = Math.max(0, (gameBoardImage.naturalHeight - sourceHeight) / 2);
+        sourceX += Math.sin(elapsed * .18) * Math.min(72, horizontalRoom);
+        sourceY += Math.cos(elapsed * .13) * Math.min(24, verticalRoom);
+      }
       context.drawImage(gameBoardImage, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, WORLD.width, WORLD.height);
     } else {
       const gradient = context.createLinearGradient(0, 0, WORLD.width, WORLD.height);
@@ -587,19 +618,78 @@
     context.fillStyle = dreamWash;
     context.fillRect(0, 0, WORLD.width, WORLD.height);
 
-    // Soft fireflies make the city feel alive without becoming obstacles.
+    // Moving fog and reflected light make the illustrated city visibly breathe.
+    if (!reducedMotion) {
+      context.save();
+      context.globalCompositeOperation = 'screen';
+      for (let layer = 0; layer < 3; layer += 1) {
+        const travel = (elapsed * (22 + layer * 8) + layer * 270) % (WORLD.width + 420);
+        const x = travel - 210;
+        const y = WORLD.height * (.22 + layer * .24) + Math.sin(elapsed * .25 + layer) * 28;
+        const fog = context.createRadialGradient(x, y, 10, x, y, 210 + layer * 36);
+        fog.addColorStop(0, layer === 1 ? 'rgba(255,177,219,.14)' : 'rgba(145,224,235,.13)');
+        fog.addColorStop(.55, 'rgba(185,151,235,.06)');
+        fog.addColorStop(1, 'rgba(145,224,235,0)');
+        context.fillStyle = fog;
+        context.beginPath();
+        context.ellipse(x, y, 255 + layer * 45, 52 + layer * 10, -.12, 0, Math.PI * 2);
+        context.fill();
+      }
+
+      context.lineCap = 'round';
+      for (let trail = 0; trail < 5; trail += 1) {
+        const drift = Math.sin(elapsed * .38 + trail * 1.6) * 24;
+        context.globalAlpha = .08 + trail * .012;
+        context.strokeStyle = trail % 2 ? '#ffd58a' : '#d49bff';
+        context.lineWidth = 1.2 + trail * .3;
+        context.beginPath();
+        context.moveTo(-80, WORLD.height * (.33 + trail * .1) + drift);
+        context.bezierCurveTo(WORLD.width * .22, WORLD.height * (.2 + trail * .11), WORLD.width * .7, WORLD.height * (.56 + trail * .045), WORLD.width + 90, WORLD.height * (.38 + trail * .08) - drift);
+        context.stroke();
+      }
+      context.restore();
+    }
+
+    // Traveling fireflies and star sparks make the background motion easy to see.
     context.save();
-    for (let index = 0; index < 24; index += 1) {
-      const x = (index * 173 + 79) % WORLD.width;
+    context.globalCompositeOperation = 'screen';
+    for (let index = 0; index < 34; index += 1) {
+      const travelWidth = WORLD.width + 80;
+      const speed = 8 + (index % 6) * 3.2;
+      const x = ((index * 173 + 79 + elapsed * speed) % travelWidth) - 40;
       const baseY = (index * 97 + 55) % WORLD.height;
-      const y = baseY + Math.sin(elapsed * .55 + index * 1.7) * 12;
-      const alpha = .16 + (Math.sin(elapsed * 1.4 + index) + 1) * .13;
+      const y = baseY + Math.sin(elapsed * (.85 + (index % 3) * .14) + index * 1.7) * 19;
+      const alpha = .24 + (Math.sin(elapsed * 2.1 + index) + 1) * .18;
       context.globalAlpha = alpha;
       context.fillStyle = index % 4 === 0 ? '#9ee9eb' : '#ffd97c';
       context.shadowColor = context.fillStyle;
-      context.shadowBlur = 12;
+      context.shadowBlur = 15;
+      if (index % 5 === 0) starPath(x, y, 4.2, 1.25);
+      else {
+        context.beginPath();
+        context.arc(x, y, index % 3 === 0 ? 2.8 : 1.7, 0, Math.PI * 2);
+      }
+      context.fill();
+    }
+
+    // A handful of bright wisps visibly cross the plaza behind the objects.
+    for (let wisp = 0; wisp < 4; wisp += 1) {
+      const progress = ((elapsed * (42 + wisp * 7) + wisp * 230) % (WORLD.width + 260)) - 130;
+      const wispY = WORLD.height * (.18 + wisp * .19) + Math.sin(elapsed * .8 + wisp) * 22;
+      const tail = context.createLinearGradient(progress - 70, wispY, progress + 8, wispY);
+      tail.addColorStop(0, 'rgba(255,213,138,0)');
+      tail.addColorStop(1, wisp % 2 ? 'rgba(158,233,235,.48)' : 'rgba(255,213,138,.52)');
+      context.globalAlpha = .7;
+      context.strokeStyle = tail;
+      context.lineWidth = 2;
       context.beginPath();
-      context.arc(x, y, index % 3 === 0 ? 2.4 : 1.5, 0, Math.PI * 2);
+      context.moveTo(progress - 70, wispY + 9);
+      context.quadraticCurveTo(progress - 28, wispY - 12, progress, wispY);
+      context.stroke();
+      context.fillStyle = wisp % 2 ? '#9ee9eb' : '#ffd58a';
+      context.shadowColor = context.fillStyle;
+      context.shadowBlur = 18;
+      starPath(progress, wispY, 5, 1.5);
       context.fill();
     }
     context.restore();
@@ -618,24 +708,26 @@
 
   function drawObjectShape(object, alpha = 1, offsetX = 0) {
     const color = objectColor(object.kind);
+    const revealedEcho = object.type === 'echo' && object.revealed;
     const floatY = reducedMotion ? 0 : Math.sin(elapsed * 2.4 + object.phase) * 4;
     context.save();
-    context.translate(object.x + offsetX, object.y + floatY);
+    const glitchJitter = revealedEcho && object.glitch > 0 ? Math.sin(elapsed * 42 + object.phase) * object.glitch * 5 : 0;
+    context.translate(object.x + offsetX + glitchJitter, object.y + floatY);
     context.scale(Math.max(0, object.scale), Math.max(0, object.scale));
     context.globalAlpha = alpha;
 
     if (object.kind !== 'memory') {
       const bubbleRadius = object.radius + 17;
       const bubble = context.createRadialGradient(-bubbleRadius * .28, -bubbleRadius * .32, 2, 0, 0, bubbleRadius);
-      bubble.addColorStop(0, object.type === 'echo' ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.84)');
-      bubble.addColorStop(.52, object.type === 'echo' ? 'rgba(255,255,255,.025)' : `${color}bb`);
-      bubble.addColorStop(1, object.type === 'echo' ? 'rgba(255,255,255,0)' : `${color}4d`);
+      bubble.addColorStop(0, revealedEcho ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.84)');
+      bubble.addColorStop(.52, revealedEcho ? 'rgba(126,215,209,.08)' : `${color}bb`);
+      bubble.addColorStop(1, revealedEcho ? 'rgba(255,143,159,0)' : `${color}4d`);
       context.fillStyle = bubble;
-      context.strokeStyle = object.type === 'echo' ? 'rgba(255,255,255,.28)' : 'rgba(255,250,240,.86)';
-      context.lineWidth = object.type === 'echo' ? 1 : 1.8;
-      context.setLineDash(object.type === 'echo' ? [3, 5] : []);
+      context.strokeStyle = revealedEcho ? 'rgba(255,255,255,.34)' : 'rgba(255,250,240,.86)';
+      context.lineWidth = revealedEcho ? 1.2 : 1.8;
+      context.setLineDash(revealedEcho ? [3, 5] : []);
       context.shadowColor = color;
-      context.shadowBlur = object.type === 'echo' ? 7 : 24;
+      context.shadowBlur = revealedEcho ? 8 : 24;
       context.beginPath();
       context.arc(0, 0, bubbleRadius, 0, Math.PI * 2);
       context.fill();
@@ -643,7 +735,7 @@
       context.stroke();
       context.setLineDash([]);
 
-      if (object.type !== 'echo') {
+      if (!revealedEcho) {
         context.fillStyle = '#fff4b5';
         context.shadowColor = '#fff1a0';
         context.shadowBlur = 9;
@@ -658,7 +750,7 @@
 
     context.rotate(object.rotation);
     context.shadowColor = color;
-    context.shadowBlur = object.type === 'echo' ? 5 : 10;
+    context.shadowBlur = revealedEcho ? 5 : 10;
     context.fillStyle = color;
     context.strokeStyle = '#4b3559';
     context.lineWidth = 2;
@@ -727,15 +819,30 @@
   function drawObjects() {
     objects.forEach((object) => {
       if (object.type === 'echo') {
-        const flicker = reducedMotion ? .34 : .2 + (Math.sin(elapsed * 8 + object.phase) + 1) * .13;
-        drawObjectShape(object, flicker, -7);
-        drawObjectShape(object, flicker + .12, 7);
-        context.save();
-        context.globalAlpha = .22;
-        context.strokeStyle = '#fffaf1';
-        context.setLineDash([3, 6]);
-        context.beginPath(); context.arc(object.x, object.y, object.radius + 8, 0, Math.PI * 2); context.stroke();
-        context.restore();
+        if (object.revealed) {
+          const strength = Math.max(.18, object.glitch);
+          drawObjectShape(object, .42 + strength * .25, -8 - strength * 4);
+          drawObjectShape(object, .5 + strength * .25, 8 + strength * 4);
+          context.save();
+          context.globalAlpha = .28 + strength * .34;
+          context.strokeStyle = '#fffaf1';
+          context.setLineDash([3, 6]);
+          context.beginPath(); context.arc(object.x, object.y, object.radius + 18 + strength * 8, 0, Math.PI * 2); context.stroke();
+          context.fillStyle = '#fff7e8';
+          context.font = '800 8px "Segoe UI", Arial, sans-serif';
+          context.textAlign = 'center';
+          context.fillText('FALSE ECHO', object.x, object.y - object.radius - 27);
+          context.restore();
+        } else {
+          // Before contact, a hallucination deliberately passes as a real object.
+          drawObjectShape(object, .98, 0);
+          const tell = reducedMotion ? -1 : Math.sin(elapsed * .72 + object.phase);
+          if (tell > .91) {
+            const whisper = (tell - .91) / .09;
+            drawObjectShape(object, whisper * .12, -3);
+            drawObjectShape(object, whisper * .1, 3);
+          }
+        }
       } else {
         drawObjectShape(object, 1);
       }
@@ -744,12 +851,13 @@
 
   function drawPlayer() {
     const moving = Math.hypot(player.vx, player.vy);
-    const bob = reducedMotion ? 0 : Math.sin(elapsed * 4.2) * 2;
+    const bob = reducedMotion ? 0 : Math.sin(elapsed * 3.7) * 5;
     const squash = player.chomp > 0 ? 1 - Math.sin(player.chomp * Math.PI) * .14 : 1;
     const growBounce = growthPulse > 0 && !reducedMotion ? 1 + Math.sin((1 - growthPulse) * Math.PI) * .14 : 1;
     const radius = player.radius;
     context.save();
     context.translate(player.x, player.y + bob);
+    if (!reducedMotion) context.rotate(Math.sin(elapsed * 1.8) * .035);
     context.scale(player.facing, 1);
     context.scale(growBounce / squash, growBounce * squash);
 
@@ -789,7 +897,37 @@
       const spriteSize = radius * 4.65;
       context.shadowColor = 'rgba(241,198,99,.36)';
       context.shadowBlur = player.chomp > 0 ? 24 : 12;
-      context.drawImage(creatureImage, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
+      const moveEnergy = Math.min(1, moving / 180);
+      const breath = reducedMotion ? 0 : Math.sin(elapsed * 2.25) * .05;
+      const step = reducedMotion ? 0 : Math.sin(elapsed * 8.4) * (.32 + moveEnergy * .68);
+      const headTilt = reducedMotion ? 0 : Math.sin(elapsed * 2.35) * .075 + Math.max(-.07, Math.min(.07, player.vx * .0002));
+      const earWiggle = reducedMotion ? 0 : Math.sin(elapsed * 5.4) * .105;
+      const chompPop = player.chomp > 0 ? Math.sin(player.chomp * Math.PI) : 0;
+
+      const drawCreatureRegion = (xStart, xEnd, yStart, yEnd, pivotX, pivotY, offsetX, offsetY, rotation, scaleX = 1, scaleY = 1) => {
+        const left = -spriteSize / 2 + spriteSize * xStart;
+        const top = -spriteSize / 2 + spriteSize * yStart;
+        const pivotLeft = -spriteSize / 2 + spriteSize * pivotX;
+        const pivotTop = -spriteSize / 2 + spriteSize * pivotY;
+        context.save();
+        context.beginPath();
+        context.rect(left - 3, top - 3, spriteSize * (xEnd - xStart) + 6, spriteSize * (yEnd - yStart) + 6);
+        context.clip();
+        context.translate(pivotLeft + offsetX, pivotTop + offsetY);
+        context.rotate(rotation);
+        context.scale(scaleX, scaleY);
+        context.translate(-pivotLeft, -pivotTop);
+        context.drawImage(creatureImage, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
+        context.restore();
+      };
+
+      // The character is rebuilt from independently moving regions. The ears
+      // wiggle, the head tilts, the body breathes, and the feet dangle.
+      drawCreatureRegion(0, 1, .67, 1, .5, .69, step * 4.8, Math.abs(step) * 3.1, -step * .038, 1 + moveEnergy * .025, 1 - moveEnergy * .04);
+      drawCreatureRegion(0, 1, .4, .7, .5, .55, -step * 1.6, -breath * radius * .45, step * .018, 1 + breath + chompPop * .06, 1 - breath * .72 - chompPop * .04);
+      drawCreatureRegion(.08, .49, 0, .38, .33, .22, -2 - earWiggle * 12, -Math.abs(earWiggle) * 5, -earWiggle - .025, 1, 1 + Math.abs(earWiggle) * .18);
+      drawCreatureRegion(.53, .96, 0, .37, .72, .2, 2 + earWiggle * 11, -Math.abs(earWiggle) * 4, earWiggle * .86 + .022, 1, 1 + Math.abs(earWiggle) * .16);
+      drawCreatureRegion(.22, .86, .19, .46, .54, .34, step * .9, -Math.abs(step) * 2.2 - chompPop * 5, headTilt, 1 + chompPop * .075, 1 - chompPop * .04);
       context.restore();
       return;
     }
@@ -974,9 +1112,9 @@
     resetGrowth();
     buildStage(0);
     showOverlay(
-      'FIRST DRAFT · WEEK 02',
+      INTRO_STEP,
       'Make some room to breathe.',
-      'Move the little dream creature into the solid objects. Each one you swallow makes the world a little quieter.',
+      'Guide the little dreamer through the living city. Real thoughts help it grow, but some thoughts may only be copies.',
       'Start the game',
       beginGame
     );
