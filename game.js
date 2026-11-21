@@ -26,6 +26,8 @@
   gameBoardImage.src = 'assets/swallow-static-game-board.png?v=1';
   const creatureImage = new Image();
   creatureImage.src = 'assets/swallow-static-creature.png?v=1';
+  const creatureSpriteImage = new Image();
+  creatureSpriteImage.src = 'assets/swallow-static-creature-sprites-v2.png?v=1';
 
   const WORLD = { width: 960, height: 620 };
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -199,6 +201,7 @@
     player.targetRadius = player.radius;
     player.vx = 0;
     player.vy = 0;
+    player.blink = 0;
     pointerTarget = null;
 
     for (let index = 0; index < stage.goal; index += 1) objects.push(makeObject('solid'));
@@ -853,7 +856,7 @@
   function drawPlayer() {
     const moving = Math.hypot(player.vx, player.vy);
     const bob = reducedMotion ? 0 : Math.sin(elapsed * 3.7) * 5;
-    const squash = player.chomp > 0 ? 1 - Math.sin(player.chomp * Math.PI) * .14 : 1;
+    const squash = player.chomp > 0 ? 1 - Math.sin(player.chomp * Math.PI) * .025 : 1;
     const growBounce = growthPulse > 0 && !reducedMotion ? 1 + Math.sin((1 - growthPulse) * Math.PI) * .14 : 1;
     const radius = player.radius;
     context.save();
@@ -870,7 +873,7 @@
     context.fill();
     context.restore();
 
-    if (creatureImage.complete && creatureImage.naturalWidth) {
+    if (creatureSpriteImage.complete && creatureSpriteImage.naturalWidth) {
       const aura = context.createRadialGradient(0, 0, radius * .1, 0, 0, radius * 1.75);
       aura.addColorStop(0, 'rgba(255,210,145,.2)');
       aura.addColorStop(.55, 'rgba(180,132,233,.13)');
@@ -899,80 +902,67 @@
       context.shadowColor = 'rgba(241,198,99,.36)';
       context.shadowBlur = player.chomp > 0 ? 24 : 12;
       const moveEnergy = Math.min(1, moving / 180);
-      const breath = reducedMotion ? 0 : Math.sin(elapsed * 2.25) * .035;
-      const step = reducedMotion ? 0 : Math.sin(elapsed * 8.4) * moveEnergy;
+      const breath = reducedMotion ? 0 : Math.sin(elapsed * 2.25) * .016;
       const travelTilt = reducedMotion ? 0 : Math.max(-.055, Math.min(.055, player.vx * .00016));
       const chewProgress = player.chomp > 0 ? 1 - player.chomp : 0;
-      const chewWave = player.chomp > 0 && !reducedMotion ? Math.sin(chewProgress * Math.PI * 4) : 0;
-      const chewOpen = player.chomp > 0 ? (chewWave + 1) / 2 : 1;
+      const walkWave = reducedMotion ? 0 : Math.sin(elapsed * Math.PI * 7);
+      const idleCycle = player.blink % 3.7;
+      let spriteFrame = 0;
+      let poseBounce = 0;
 
-      // Draw the creature exactly once so the silhouette always remains a
-      // single soft character. Squash, stretch, tilt, and bounce animate the
-      // complete body without cutting the illustration into visible pieces.
+      if (!reducedMotion && player.chomp > 0) {
+        // Frames 5 and 6 are complete, generated chewing poses. Alternating
+        // them creates a genuine mouth-and-hands chew without painted overlays.
+        spriteFrame = 4 + (Math.floor(chewProgress * 6) % 2);
+        poseBounce = -Math.abs(Math.sin(chewProgress * Math.PI * 6)) * 2.4;
+      } else if (!reducedMotion && moving > 24) {
+        // Frames 3 and 4 swap the lifted leg and waving arm while traveling.
+        spriteFrame = 2 + (Math.floor(elapsed * 7) % 2);
+        poseBounce = -Math.abs(walkWave) * 2.8;
+      } else if (!reducedMotion && idleCycle > 3.18) {
+        // Frame 2 is a fully rendered blink of the same intact character.
+        spriteFrame = 1;
+      } else if (!reducedMotion && idleCycle > 1.45 && idleCycle < 1.88) {
+        // A short intact wave-and-leg-lift keeps the idle pose alive too.
+        spriteFrame = 2;
+        poseBounce = -Math.sin(((idleCycle - 1.45) / .43) * Math.PI) * 1.8;
+      }
+
+      const frameWidth = creatureSpriteImage.naturalWidth / 3;
+      const frameHeight = creatureSpriteImage.naturalHeight / 2;
+      const sourceX = (spriteFrame % 3) * frameWidth;
+      const sourceY = Math.floor(spriteFrame / 3) * frameHeight;
+
+      // Every state is a complete furry character frame. There are no clipped
+      // body bands and no canvas-painted eyes or mouth.
       context.save();
-      context.translate(step * 2.2, Math.abs(step) * 1.6 - Math.abs(chewWave) * 2.2);
-      context.rotate(travelTilt + step * .018 + chewWave * .012);
+      context.translate(0, poseBounce);
+      context.rotate(travelTilt + walkWave * moveEnergy * .012);
       context.scale(
-        1 + breath + moveEnergy * .018 + Math.abs(chewWave) * .035,
-        1 - breath * .7 - moveEnergy * .025 - Math.abs(chewWave) * .045
+        1 + breath + moveEnergy * .008,
+        1 - breath * .6 - moveEnergy * .01
       );
-      context.drawImage(creatureImage, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
+      context.drawImage(
+        creatureSpriteImage,
+        sourceX,
+        sourceY,
+        frameWidth,
+        frameHeight,
+        -spriteSize / 2,
+        -spriteSize / 2,
+        spriteSize,
+        spriteSize
+      );
       context.restore();
+      context.restore();
+      return;
+    }
 
-      // The original art has open eyes, so soft colored eyelids are drawn over
-      // the exact eye positions for a natural blink every few seconds.
-      const blinkCycle = reducedMotion ? 0 : player.blink % 3.7;
-      const blinkAmount = blinkCycle > 3.34 ? Math.sin(((blinkCycle - 3.34) / .36) * Math.PI) : 0;
-      if (blinkAmount > 0) {
-        const lidGradient = context.createLinearGradient(0, -spriteSize * .24, 0, -spriteSize * .08);
-        lidGradient.addColorStop(0, '#d07ab6');
-        lidGradient.addColorStop(1, '#9c5aaa');
-        const drawEyelid = (x, y, rx, ry, rotation) => {
-          context.save();
-          context.translate(x, y);
-          context.rotate(rotation);
-          context.fillStyle = lidGradient;
-          context.strokeStyle = 'rgba(70,35,72,.86)';
-          context.lineWidth = Math.max(1.2, spriteSize * .012);
-          context.beginPath();
-          context.ellipse(0, 0, rx, Math.max(1, ry * blinkAmount), 0, 0, Math.PI * 2);
-          context.fill();
-          if (blinkAmount > .55) {
-            context.beginPath();
-            context.moveTo(-rx * .8, 0);
-            context.quadraticCurveTo(0, ry * .35, rx * .8, 0);
-            context.stroke();
-          }
-          context.restore();
-        };
-        drawEyelid(spriteSize * .02, -spriteSize * .158, spriteSize * .075, spriteSize * .066, -.07);
-        drawEyelid(spriteSize * .222, -spriteSize * .197, spriteSize * .065, spriteSize * .06, -.24);
-      }
-
-      // During a swallow, redraw the mouth as it closes and opens twice. This
-      // produces a clear chewing expression while keeping the body unified.
-      if (player.chomp > 0) {
-        const mouthX = spriteSize * .166;
-        const mouthY = -spriteSize * .088;
-        const mouthHeight = spriteSize * (.008 + chewOpen * .036);
-        context.save();
-        context.translate(mouthX, mouthY);
-        context.rotate(.08);
-        context.fillStyle = '#542542';
-        context.strokeStyle = 'rgba(62,25,54,.88)';
-        context.lineWidth = Math.max(1, spriteSize * .009);
-        context.beginPath();
-        context.ellipse(0, 0, spriteSize * .048, mouthHeight, 0, 0, Math.PI * 2);
-        context.fill();
-        context.stroke();
-        if (chewOpen > .46) {
-          context.fillStyle = '#f2707f';
-          context.beginPath();
-          context.ellipse(0, mouthHeight * .45, spriteSize * .025, mouthHeight * .3, 0, 0, Math.PI * 2);
-          context.fill();
-        }
-        context.restore();
-      }
+    // Keep the original complete PNG as a safe fallback if the sprite sheet
+    // has not loaded yet; it is never cut into pieces.
+    if (creatureImage.complete && creatureImage.naturalWidth) {
+      const spriteSize = radius * 4.65;
+      context.drawImage(creatureImage, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
       context.restore();
       return;
     }
