@@ -9,6 +9,8 @@
   --game-mist: #d7e1df;
 }
 
+html { scroll-behavior: auto; }
+
 .game-page {
   color: var(--game-ink);
   overflow-x: hidden;

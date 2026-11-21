@@ -6,9 +6,9 @@
   <meta name="description" content="Play Swallow the Static, Criss Binoi's final Hallucination web game about swallowing real thoughts, exposing false echoes, and protecting one memory.">
   <title>Swallow the Static | Final Game · Criss Binoi</title>
   <link rel="stylesheet" href="styles.css?v=14">
-  <link rel="stylesheet" href="game.css?v=13">
+  <link rel="stylesheet" href="game.css?v=14">
   <script src="script.js?v=14" defer></script>
-  <script src="game.js?v=16" defer></script>
+  <script src="game.js?v=17" defer></script>
 </head>
 <body class="game-page" data-page="game">
   <header class="site-header game-header" id="top">
@@ -54,9 +54,9 @@
             <b id="noise-value">100%</b>
           </div>
           <div class="hud-count"><span>GULPED</span><strong><b id="cleared-count">0</b>/<b id="cleared-goal">7</b></strong></div>
-          <div class="hud-growth" aria-label="Creature growth, zero of five">
+          <div class="hud-growth" aria-label="Creature growth, zero of three">
             <span>GROWTH</span>
-            <div class="growth-pips" id="growth-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="growth-pips" id="growth-pips" aria-hidden="true"><i></i><i></i><i></i></div>
           </div>
           <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="true" aria-label="Mute game sound"><span aria-hidden="true">♪</span> Sound on</button>
         </div>
@@ -72,10 +72,10 @@
               </div>
               <p class="overlay-step" id="overlay-step">FINAL GAME · WEEK 03</p>
               <h2 id="overlay-title">Make some room to breathe.</h2>
-              <p id="overlay-copy">Guide the tiny dream creature through the living city. Fake thoughts shimmer from Stage 1, and every third real thought makes the creature noticeably bigger.</p>
+              <p id="overlay-copy">Guide the tiny dream creature through the living city. Three fake thoughts shimmer from Stage 1, and every second real thought makes the creature noticeably bigger.</p>
               <div class="instruction-grid" id="instruction-grid">
                 <div><span aria-hidden="true">↔</span><strong>Move</strong><small>Drag, tap, arrow keys, or WASD</small></div>
-                <div><span aria-hidden="true">✦</span><strong>Grow</strong><small>Start tiny; every third real thought increases your size</small></div>
+                <div><span aria-hidden="true">✦</span><strong>Grow</strong><small>Start each stage tiny; every second real thought increases your size</small></div>
                 <div><span aria-hidden="true">◌</span><strong>Doubt</strong><small>Copies look swallowable from Stage 1, but cannot be eaten</small></div>
               </div>
               <button class="game-button" id="overlay-button" type="button">Start the game</button>
@@ -112,7 +112,7 @@
         <article class="process-card">
           <span>02</span>
           <h3>What changed</h3>
-              <p>False copies now shimmer from Stage 1 and reveal themselves when touched. The creature grows in five visible steps, and the city moves with brighter stardust.</p>
+              <p>False copies now shimmer from Stage 1 and reveal themselves when touched. The creature resets small each stage, then grows in three visible steps as it swallows real thoughts. The city also moves with brighter stardust.</p>
         </article>
         <article class="process-card">
           <span>03</span>

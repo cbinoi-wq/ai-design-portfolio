@@ -91,6 +91,8 @@
   let bumpCooldown = 0;
   let objectId = 0;
   let animationFrame = 0;
+  let gameInView = true;
+  let lastRendered = 0;
   let combo = 0;
   let comboTimer = 0;
   let comboFlash = 0;
@@ -100,7 +102,8 @@
   let growthPulse = 0;
 
   const BASE_PLAYER_RADIUS = 26;
-  const MAX_PLAYER_RADIUS = 54;
+  const MAX_PLAYER_RADIUS = 44;
+  const MAX_GROWTH_LEVEL = 3;
   const PLAYER_VISUAL_MARGIN_FACTOR = 2.55;
   const player = {
     x: WORLD.width * .5,
@@ -117,7 +120,7 @@
   const objectKinds = ['note', 'cup', 'phone', 'clock', 'book', 'lamp'];
 
   function growthRadius() {
-    return Math.min(MAX_PLAYER_RADIUS, BASE_PLAYER_RADIUS + growthLevel * ((MAX_PLAYER_RADIUS - BASE_PLAYER_RADIUS) / 5));
+    return Math.min(MAX_PLAYER_RADIUS, BASE_PLAYER_RADIUS + growthLevel * ((MAX_PLAYER_RADIUS - BASE_PLAYER_RADIUS) / MAX_GROWTH_LEVEL));
   }
 
   function resetGrowth() {
@@ -154,7 +157,7 @@
       WORLD.width = nextWorldWidth;
     }
     keepPlayerFullyVisible();
-    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    pixelRatio = Math.min(window.devicePixelRatio || 1, cssWidth > 1200 ? 1.35 : 1.6);
     canvas.width = Math.round(cssWidth * pixelRatio);
     canvas.height = Math.round(cssHeight * pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
@@ -203,6 +206,9 @@
 
   function buildStage(index) {
     const stage = stages[index];
+    // Each stage begins with the creature tiny again, then grows in three
+    // clear steps after every two real thoughts it swallows.
+    resetGrowth();
     stageIndex = index;
     cleared = 0;
     noise = 100;
@@ -223,8 +229,24 @@
     player.blink = 0;
     pointerTarget = null;
 
-    for (let index = 0; index < stage.goal; index += 1) objects.push(makeObject('solid'));
-    for (let index = 0; index < stage.echoes; index += 1) objects.push(makeObject('echo'));
+    if (index === 0) {
+      // Put all three first-stage hallucinations in clear, safe positions.
+      // Matching solid objects are added afterward so they remain deceptive.
+      const echoKinds = ['cup', 'phone', 'book'];
+      const echoSlots = [[.22, .25], [.78, .32], [.78, .72]];
+      echoSlots.forEach((slot, slotIndex) => {
+        const echo = makeObject('echo', echoKinds[slotIndex]);
+        echo.x = WORLD.width * slot[0];
+        echo.y = WORLD.height * slot[1];
+        objects.push(echo);
+      });
+      for (let solidIndex = 0; solidIndex < stage.goal; solidIndex += 1) {
+        objects.push(makeObject('solid', solidIndex < echoKinds.length ? echoKinds[solidIndex] : null));
+      }
+    } else {
+      for (let solidIndex = 0; solidIndex < stage.goal; solidIndex += 1) objects.push(makeObject('solid'));
+      for (let echoIndex = 0; echoIndex < stage.echoes; echoIndex += 1) objects.push(makeObject('echo'));
+    }
     if (stage.memory) {
       const memory = makeObject('memory', 'memory');
       memory.x = WORLD.width * .82;
@@ -245,7 +267,7 @@
     noiseFill.style.width = `${noise}%`;
     if (growthPips) {
       growthPips.querySelectorAll('i').forEach((pip, index) => pip.classList.toggle('is-on', index < growthLevel));
-      growthPips.parentElement?.setAttribute('aria-label', `Creature growth, ${growthLevel} of 5`);
+      growthPips.parentElement?.setAttribute('aria-label', `Creature growth, ${growthLevel} of ${MAX_GROWTH_LEVEL}`);
     }
   }
 
@@ -270,7 +292,7 @@
     // Starting any stage restores the entire HUD, board, and controls to view,
     // even if the player scrolled inside the instruction card to reach Start.
     window.requestAnimationFrame(() => {
-      gameFrame?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+      gameFrame?.scrollIntoView({ behavior: 'auto', block: 'start' });
     });
   }
 
@@ -338,29 +360,29 @@
   function playGulp() {
     // A short bright pop makes the contact easy to hear, followed by a
     // rounded low gulp. All tones are synthesized in the browser.
-    tone(330, 145, .13, .06, 'triangle');
-    tone(175, 58, .38, .09, 'sine', .035);
-    tone(92, 44, .45, .04, 'sine', .09);
+    tone(330, 145, .13, .12, 'triangle');
+    tone(175, 58, .38, .18, 'sine', .035);
+    tone(92, 44, .45, .08, 'sine', .09);
   }
 
   function playCombo() {
-    tone(420, 620, .18, .035, 'sine');
-    tone(620, 880, .24, .026, 'sine', .08);
+    tone(420, 620, .18, .07, 'sine');
+    tone(620, 880, .24, .052, 'sine', .08);
   }
 
   function playEcho() {
-    tone(430, 260, .18, .018, 'sine');
-    tone(520, 310, .22, .012, 'sine', .04);
+    tone(430, 260, .18, .045, 'sine');
+    tone(520, 310, .22, .03, 'sine', .04);
   }
 
   function playMemory() {
-    tone(330, 440, .5, .035, 'sine');
-    tone(440, 660, .6, .022, 'sine', .12);
+    tone(330, 440, .5, .07, 'sine');
+    tone(440, 660, .6, .045, 'sine', .12);
   }
 
   function playFinishSound() {
     playMemory();
-    tone(660, 880, .55, .018, 'sine', .28);
+    tone(660, 880, .55, .04, 'sine', .28);
   }
 
   function addParticles(object, color, extra = 0) {
@@ -391,7 +413,7 @@
     cleared += 1;
     totalSwallowed += 1;
     noise = Math.max(stageIndex === 2 ? 14 : 8, 100 - (cleared / stages[stageIndex].goal) * (stageIndex === 2 ? 86 : 92));
-    const nextGrowthLevel = Math.min(5, Math.floor(totalSwallowed / 3));
+    const nextGrowthLevel = Math.min(MAX_GROWTH_LEVEL, Math.floor(totalSwallowed / 2));
     const didGrow = nextGrowthLevel > growthLevel;
     if (didGrow) {
       growthLevel = nextGrowthLevel;
@@ -405,7 +427,7 @@
     message.textContent = cleared === stages[stageIndex].goal
       ? (stageIndex === 2 ? 'The city is quiet. Return to the glowing memory.' : 'This part of the city is quiet now.')
       : didGrow
-        ? `Growth ${growthLevel}/5! The tiny dreamer is visibly bigger now. ✦`
+        ? `Growth ${growthLevel}/${MAX_GROWTH_LEVEL}! The tiny dreamer is visibly bigger now. ✦`
       : combo >= 2
         ? `Sparkle combo x${combo}! Keep going!`
         : ['Yum! Chase another glowing thought.', 'The city feels lighter already.', 'A little more room to breathe.'][cleared % 3];
@@ -870,18 +892,18 @@
           // persistent split aura makes the visual lie readable from Stage 1.
           drawObjectShape(object, .98, 0);
           const pulse = reducedMotion ? .45 : (Math.sin(elapsed * 3.2 + object.phase) + 1) / 2;
-          const separation = 2.5 + pulse * 3;
-          drawObjectShape(object, .1 + pulse * .1, -separation);
-          drawObjectShape(object, .08 + (1 - pulse) * .11, separation);
+          const separation = 5 + pulse * 4;
+          drawObjectShape(object, .22 + pulse * .1, -separation);
+          drawObjectShape(object, .21 + (1 - pulse) * .1, separation);
           context.save();
           context.globalCompositeOperation = 'screen';
-          context.globalAlpha = .18 + pulse * .14;
+          context.globalAlpha = .36 + pulse * .16;
           context.strokeStyle = pulse > .5 ? '#ffc1dd' : '#9ee9eb';
-          context.lineWidth = 1.4;
+          context.lineWidth = 2;
           context.setLineDash([2, 7]);
           context.lineDashOffset = -elapsed * 18;
           context.shadowColor = context.strokeStyle;
-          context.shadowBlur = 10;
+          context.shadowBlur = 16;
           context.beginPath();
           context.arc(object.x, object.y, object.radius + 25 + pulse * 3, 0, Math.PI * 2);
           context.stroke();
@@ -890,7 +912,7 @@
             const orbit = object.radius + 29 + mote * 3;
             context.fillStyle = mote % 2 ? '#ffc1dd' : '#9ee9eb';
             context.beginPath();
-            context.arc(object.x + Math.cos(angle) * orbit, object.y + Math.sin(angle) * orbit, 2.2, 0, Math.PI * 2);
+            context.arc(object.x + Math.cos(angle) * orbit, object.y + Math.sin(angle) * orbit, 2.8, 0, Math.PI * 2);
             context.fill();
           }
           context.restore();
@@ -1142,10 +1164,15 @@
   }
 
   function loop(now) {
-    const delta = Math.min(.04, Math.max(0, (now - lastTime) / 1000));
-    lastTime = now;
-    update(delta);
-    draw();
+    if (!gameInView) {
+      lastTime = now;
+    } else if (now - lastRendered >= 1000 / 30) {
+      const delta = Math.min(.04, Math.max(0, (now - lastTime) / 1000));
+      lastTime = now;
+      lastRendered = now;
+      update(delta);
+      draw();
+    }
     animationFrame = requestAnimationFrame(loop);
   }
 
@@ -1197,7 +1224,7 @@
     showOverlay(
       INTRO_STEP,
       'Make some room to breathe.',
-      'Guide the little dreamer through the living city. Shimmering copies appear immediately, and every third real thought makes the creature noticeably bigger.',
+      'Guide the little dreamer through the living city. Three shimmering copies appear immediately, and every second real thought makes the creature noticeably bigger.',
       'Start the game',
       beginGame
     );
@@ -1206,6 +1233,17 @@
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
   buildStage(0);
+  if ('IntersectionObserver' in window && gameFrame) {
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      gameInView = entry.isIntersecting;
+      if (gameInView) {
+        lastTime = performance.now();
+        lastRendered = 0;
+        draw();
+      }
+    }, { rootMargin: '140px 0px' });
+    visibilityObserver.observe(gameFrame);
+  }
   overlayButton.onclick = beginGame;
   animationFrame = requestAnimationFrame(loop);
 })();
