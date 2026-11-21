@@ -31,6 +31,7 @@
   creatureSpriteImage.src = 'assets/swallow-static-creature-sprites-v2.png?v=1';
 
   const WORLD = { width: 960, height: 620 };
+  const MAX_WORLD_WIDTH = 1340;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const INTRO_STEP = 'FINAL GAME · WEEK 03';
   const stages = [
@@ -140,7 +141,7 @@
     cssWidth = rect.width;
     cssHeight = rect.height;
     const previousWorldWidth = WORLD.width;
-    const nextWorldWidth = Math.max(460, Math.min(960, WORLD.height * (cssWidth / cssHeight)));
+    const nextWorldWidth = Math.max(460, Math.min(MAX_WORLD_WIDTH, WORLD.height * (cssWidth / cssHeight)));
     if (Math.abs(nextWorldWidth - previousWorldWidth) > 1) {
       const horizontalScale = nextWorldWidth / previousWorldWidth;
       player.x *= horizontalScale;
