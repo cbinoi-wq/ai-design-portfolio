@@ -11,6 +11,7 @@
   const overlayButton = document.querySelector('#overlay-button');
   const overlayLink = document.querySelector('#overlay-link');
   const instructionGrid = document.querySelector('#instruction-grid');
+  const gameFrame = document.querySelector('#game-frame');
   const message = document.querySelector('#game-message');
   const stageNumber = document.querySelector('#stage-number');
   const stageName = document.querySelector('#stage-name');
@@ -94,6 +95,7 @@
 
   const BASE_PLAYER_RADIUS = 26;
   const MAX_PLAYER_RADIUS = 54;
+  const PLAYER_VISUAL_MARGIN_FACTOR = 2.55;
 
   const player = {
     x: WORLD.width * .5,
@@ -121,6 +123,18 @@
     player.targetRadius = BASE_PLAYER_RADIUS;
   }
 
+  function keepPlayerFullyVisible() {
+    // The furry sprite is much wider than its collision circle, especially
+    // during the growth bounce. Use the complete artwork as the boundary.
+    const visualMargin = player.radius * PLAYER_VISUAL_MARGIN_FACTOR + 8;
+    player.x = Math.max(visualMargin, Math.min(WORLD.width - visualMargin, player.x));
+    player.y = Math.max(visualMargin, Math.min(WORLD.height - visualMargin, player.y));
+    if (pointerTarget) {
+      pointerTarget.x = Math.max(visualMargin, Math.min(WORLD.width - visualMargin, pointerTarget.x));
+      pointerTarget.y = Math.max(visualMargin, Math.min(WORLD.height - visualMargin, pointerTarget.y));
+    }
+  }
+
   function resizeCanvas() {
     const rect = wrap.getBoundingClientRect();
     cssWidth = rect.width;
@@ -133,8 +147,8 @@
       objects.forEach((object) => { object.x *= horizontalScale; });
       if (pointerTarget) pointerTarget.x *= horizontalScale;
       WORLD.width = nextWorldWidth;
-      player.x = Math.max(player.radius + 9, Math.min(WORLD.width - player.radius - 9, player.x));
     }
+    keepPlayerFullyVisible();
     pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(cssWidth * pixelRatio);
     canvas.height = Math.round(cssHeight * pixelRatio);
@@ -248,6 +262,11 @@
     playing = true;
     lastTime = performance.now();
     ensureAudio();
+    // Starting any stage restores the entire HUD, board, and controls to view,
+    // even if the player scrolled inside the instruction card to reach Start.
+    window.requestAnimationFrame(() => {
+      gameFrame?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+    });
   }
 
   function beginGame() {
@@ -471,8 +490,7 @@
     player.y += player.vy * delta;
     if (Math.abs(player.vx) > 2) player.facing = Math.sign(player.vx);
     player.radius += (player.targetRadius - player.radius) * Math.min(1, delta * 8);
-    player.x = Math.max(player.radius + 9, Math.min(WORLD.width - player.radius - 9, player.x));
-    player.y = Math.max(player.radius + 9, Math.min(WORLD.height - player.radius - 9, player.y));
+    keepPlayerFullyVisible();
     // Keep the swallow reaction long enough to read as two soft chews.
     player.chomp = Math.max(0, player.chomp - delta * 1.35);
     player.blink += delta;
