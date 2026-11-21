@@ -70,6 +70,28 @@
     }
   ];
 
+  // Balanced, central layouts keep every choice readable without forcing a
+  // slow trip from one extreme edge of the city to the other.
+  const stageLayouts = [
+    [
+      [.28, .26], [.72, .30], [.70, .70],
+      [.50, .20], [.22, .46], [.40, .42], [.60, .42],
+      [.78, .48], [.32, .70], [.50, .74]
+    ],
+    [
+      [.26, .20], [.50, .18], [.74, .20],
+      [.18, .40], [.38, .40], [.62, .40], [.82, .40],
+      [.18, .62], [.38, .62], [.62, .62], [.82, .62],
+      [.34, .78], [.66, .78]
+    ],
+    [
+      [.18, .27], [.38, .27], [.62, .27], [.82, .27],
+      [.18, .47], [.36, .47], [.64, .47], [.82, .47],
+      [.22, .70], [.42, .70], [.58, .70], [.78, .70],
+      [.50, .16]
+    ]
+  ];
+
   let cssWidth = 0;
   let cssHeight = 0;
   let pixelRatio = 1;
@@ -204,6 +226,16 @@
     };
   }
 
+  function arrangeStageObjects(index) {
+    const slots = stageLayouts[index] || stageLayouts[0];
+    objects.forEach((object, objectIndex) => {
+      const slot = slots[objectIndex % slots.length];
+      object.x = Math.max(85, Math.min(WORLD.width - 85, WORLD.width * slot[0]));
+      object.y = Math.max(80, Math.min(WORLD.height - 80, WORLD.height * slot[1]));
+      object.phase += objectIndex * .47;
+    });
+  }
+
   function buildStage(index) {
     const stage = stages[index];
     // Each stage begins with the creature tiny again, then grows in three
@@ -244,8 +276,11 @@
         objects.push(makeObject('solid', solidIndex < echoKinds.length ? echoKinds[solidIndex] : null));
       }
     } else {
-      for (let solidIndex = 0; solidIndex < stage.goal; solidIndex += 1) objects.push(makeObject('solid'));
-      for (let echoIndex = 0; echoIndex < stage.echoes; echoIndex += 1) objects.push(makeObject('echo'));
+      const objectRows = Math.max(stage.goal, stage.echoes);
+      for (let objectIndex = 0; objectIndex < objectRows; objectIndex += 1) {
+        if (objectIndex < stage.goal) objects.push(makeObject('solid'));
+        if (objectIndex < stage.echoes) objects.push(makeObject('echo'));
+      }
     }
     if (stage.memory) {
       const memory = makeObject('memory', 'memory');
@@ -253,6 +288,7 @@
       memory.y = WORLD.height * .22;
       objects.push(memory);
     }
+    arrangeStageObjects(index);
     updateHud();
     message.textContent = stage.message;
   }
@@ -486,6 +522,7 @@
   function updatePlayer(delta) {
     let xDirection = 0;
     let yDirection = 0;
+    let steering = false;
     if (keys.has('arrowleft') || keys.has('a')) xDirection -= 1;
     if (keys.has('arrowright') || keys.has('d')) xDirection += 1;
     if (keys.has('arrowup') || keys.has('w')) yDirection -= 1;
@@ -493,26 +530,32 @@
 
     if (xDirection || yDirection) {
       const length = Math.hypot(xDirection, yDirection) || 1;
-      const speed = 250;
-      player.vx += (xDirection / length) * speed * delta * 6;
-      player.vy += (yDirection / length) * speed * delta * 6;
+      const speed = 400;
+      const blend = 1 - Math.exp(-10 * delta);
+      player.vx += ((xDirection / length) * speed - player.vx) * blend;
+      player.vy += ((yDirection / length) * speed - player.vy) * blend;
+      steering = true;
       pointerTarget = null;
     } else if (pointerTarget) {
       const dx = pointerTarget.x - player.x;
       const dy = pointerTarget.y - player.y;
       const distanceToTarget = Math.hypot(dx, dy);
       if (distanceToTarget > 6) {
-        const speed = Math.min(370, 90 + distanceToTarget * 2.2);
-        player.vx += (dx / distanceToTarget) * speed * delta * 5;
-        player.vy += (dy / distanceToTarget) * speed * delta * 5;
+        const speed = Math.min(680, 170 + distanceToTarget * 2.8);
+        const blend = 1 - Math.exp(-10 * delta);
+        player.vx += ((dx / distanceToTarget) * speed - player.vx) * blend;
+        player.vy += ((dy / distanceToTarget) * speed - player.vy) * blend;
+        steering = true;
       } else if (!pointerActive) {
         pointerTarget = null;
       }
     }
 
-    const damping = Math.pow(.0008, delta);
-    player.vx *= damping;
-    player.vy *= damping;
+    if (!steering) {
+      const damping = Math.pow(.0008, delta);
+      player.vx *= damping;
+      player.vy *= damping;
+    }
     player.x += player.vx * delta;
     player.y += player.vy * delta;
     if (Math.abs(player.vx) > 2) player.facing = Math.sign(player.vx);
