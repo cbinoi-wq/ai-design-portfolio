@@ -320,13 +320,32 @@ html { scroll-behavior: auto; }
   .revision-strip > span { transform: rotate(90deg); }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .game-header nav a { font-size: 10px; }
-  .game-intro { padding-inline: 20px; }
-  .cover-actions { align-items: stretch; flex-direction: column; }
-  .game-intro-note { grid-template-columns: 1fr; border-bottom: 0; }
+  .game-intro {
+    min-height: 0;
+    padding: calc(42px + env(safe-area-inset-top, 0px)) 20px 360px;
+    background:
+      linear-gradient(180deg, rgba(17,21,39,1) 0%, rgba(17,21,39,.98) 45%, rgba(17,21,39,.28) 67%, rgba(17,21,39,.72) 100%),
+      url("assets/swallow-static-hero.png") 82% bottom / auto 48% no-repeat,
+      var(--game-ink);
+  }
+  .game-intro h1 { margin: 18px 0; font-size: clamp(48px, 14.2vw, 60px); line-height: .84; }
+  .cover-lede { font-size: 17px; line-height: 1.42; }
+  .cover-actions { align-items: stretch; flex-direction: column; margin-top: 24px; }
+  .game-intro-note {
+    margin-top: 26px;
+    padding: 0 14px;
+    grid-template-columns: 1fr;
+    border: 1px solid rgba(255,250,241,.18);
+    border-radius: 18px;
+    background: rgba(17,21,39,.38);
+    box-shadow: 0 18px 42px rgba(5,5,25,.2);
+    backdrop-filter: blur(8px);
+  }
   .game-intro-note span { padding: 10px 0; border-bottom: 1px solid rgba(255,250,241,.18); }
   .game-intro-note span + span { padding-left: 0; border-left: 0; }
+  .game-intro-note span:last-child { border-bottom: 0; }
   .canvas-wrap { min-height: 520px; }
   .overlay-card h2 { font-size: 34px; }
   .play-heading > p:first-child { letter-spacing: .12em; }
