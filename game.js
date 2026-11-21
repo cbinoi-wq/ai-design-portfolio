@@ -1,4 +1,10 @@
 (() => {
+  if (!window.location.hash) {
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+    window.addEventListener('pageshow', () => window.scrollTo(0, 0), { once: true });
+  }
+
   const canvas = document.querySelector('#game-canvas');
   const wrap = document.querySelector('#canvas-wrap');
   if (!canvas || !wrap) return;
@@ -30,7 +36,7 @@
   const creatureSpriteImage = new Image();
   creatureSpriteImage.src = 'assets/swallow-static-creature-sprites-v2.png?v=1';
   const WORLD = { width: 960, height: 620 };
-  const MAX_WORLD_WIDTH = 960;
+  const MAX_WORLD_WIDTH = 1700;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const INTRO_STEP = 'FINAL GAME · WEEK 03';
   const stages = [

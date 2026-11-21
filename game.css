@@ -11,7 +11,8 @@
 
 .game-page {
   color: var(--game-ink);
-  background: #f7f0e2;
+  overflow-x: hidden;
+  background: #17152f;
 }
 
 .game-header {
@@ -215,27 +216,55 @@
 @keyframes mascotBob { 50% { transform: translateY(-5px) rotate(2deg) scale(1.035,.97); } }
 @keyframes mascotTwinkle { 50% { opacity: .4; transform: scale(.75) rotate(25deg); } }
 
-.process-notes { max-width: 1220px; margin: 0 auto; padding: clamp(90px, 11vw, 165px) clamp(22px, 4vw, 45px); }
+.process-notes { position: relative; max-width: 1220px; margin: 0 auto; padding: clamp(90px, 11vw, 165px) clamp(22px, 4vw, 45px); color: var(--game-paper); isolation: isolate; }
+.process-notes::before { position: absolute; inset-block: 0; left: 50%; z-index: -1; width: 100vw; background: radial-gradient(circle at 10% 15%, rgba(255,143,191,.18), transparent 30%), radial-gradient(circle at 88% 20%, rgba(126,215,209,.15), transparent 27%), radial-gradient(circle at 48% 100%, rgba(177,115,224,.22), transparent 38%), linear-gradient(145deg, #17152f, #251846 58%, #151b38); content: ""; transform: translateX(-50%); }
 .process-heading { display: grid; align-items: end; grid-template-columns: 1fr 1fr; gap: 18px 70px; }
-.process-heading .game-kicker { grid-column: 1 / -1; }
+.process-heading .game-kicker { grid-column: 1 / -1; color: #ffd982; }
 .process-heading h2 { margin: 0; font: 400 clamp(48px, 6vw, 86px)/.94 var(--serif); letter-spacing: -.05em; }
-.process-heading > p:last-child { max-width: 490px; margin: 0 0 8px; color: rgba(23,26,42,.7); font-family: var(--serif); font-size: clamp(18px, 2vw, 25px); line-height: 1.42; }
+.process-heading > p:last-child { max-width: 490px; margin: 0 0 8px; color: rgba(255,250,241,.72); font-family: var(--serif); font-size: clamp(18px, 2vw, 25px); line-height: 1.42; }
 .process-grid { display: grid; margin-top: clamp(50px, 7vw, 88px); grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.process-card { min-height: 310px; padding: clamp(28px, 3vw, 42px); border: 1px solid rgba(49,33,71,.13); border-radius: 26px; background: linear-gradient(145deg, rgba(255,255,255,.72), rgba(235,226,245,.55)); box-shadow: 0 18px 48px rgba(57,38,78,.07); }
-.process-card:nth-child(2) { background: linear-gradient(145deg, #2d2445, #171a2a); color: var(--game-paper); }
-.process-card > span { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: 9px; font-weight: 850; opacity: .58; }
+.process-card { min-height: 310px; padding: clamp(28px, 3vw, 42px); color: var(--game-paper); border: 1px solid rgba(255,226,166,.24); border-radius: 26px; background: linear-gradient(145deg, rgba(83,52,119,.82), rgba(35,25,70,.94)); box-shadow: 0 22px 55px rgba(5,5,25,.3), inset 0 1px rgba(255,255,255,.06); }
+.process-card:nth-child(2) { background: linear-gradient(145deg, rgba(123,58,119,.88), rgba(48,27,82,.96)); }
+.process-card:nth-child(3) { background: linear-gradient(145deg, rgba(49,72,116,.86), rgba(34,25,69,.96)); }
+.process-card > span { display: grid; width: 34px; height: 34px; place-items: center; color: #ffd982; border: 1px solid rgba(255,217,130,.58); border-radius: 50%; font-size: 9px; font-weight: 850; opacity: 1; }
 .process-card h3 { margin: 45px 0 18px; font: 400 clamp(26px, 2.7vw, 38px)/1 var(--serif); letter-spacing: -.035em; }
-.process-card p { margin: 0; color: inherit; font-size: 13px; line-height: 1.65; opacity: .76; }
-.revision-strip { display: grid; align-items: center; margin: 18px 0 42px; padding: 24px 28px; grid-template-columns: 1fr auto 1fr; border: 1px solid rgba(49,33,71,.13); border-radius: 22px; background: #fffaf1; gap: 24px; }
-.revision-strip p { margin: 0; color: rgba(23,26,42,.72); font-size: 12px; line-height: 1.5; }
-.revision-strip small { display: block; margin-bottom: 5px; color: #8d5aa9; font-size: 8px; font-weight: 850; letter-spacing: .17em; }
-.revision-strip > span { color: #d36f9e; font: 32px var(--serif); }
+.process-card p { margin: 0; color: rgba(255,250,241,.78); font-size: 13px; line-height: 1.65; opacity: 1; }
+.revision-strip { display: grid; align-items: center; margin: 18px 0 42px; padding: 24px 28px; grid-template-columns: 1fr auto 1fr; border: 1px solid rgba(255,226,166,.24); border-radius: 22px; background: rgba(255,250,241,.07); box-shadow: 0 18px 44px rgba(5,5,25,.24); gap: 24px; }
+.revision-strip p { margin: 0; color: rgba(255,250,241,.78); font-size: 12px; line-height: 1.5; }
+.revision-strip small { display: block; margin-bottom: 5px; color: #ffd982; font-size: 8px; font-weight: 850; letter-spacing: .17em; }
+.revision-strip > span { color: #ff9cc1; font: 32px var(--serif); }
 .process-links { max-width: 620px; margin-left: auto; }
 .draft-links { display: grid; align-content: center; }
-.draft-links a { padding: 16px 0; border-bottom: 1px solid rgba(23,26,42,.2); font-weight: 750; text-decoration: none; }
-.draft-links a:first-child { border-top: 1px solid rgba(23,26,42,.2); }
+.draft-links a { padding: 16px 0; color: var(--game-paper); border-bottom: 1px solid rgba(255,226,166,.22); font-weight: 750; text-decoration: none; }
+.draft-links a:first-child { border-top: 1px solid rgba(255,226,166,.22); }
 .draft-links span { float: right; }
-.game-footer { border-top: 1px solid rgba(23,26,42,.18); }
+.game-footer { color: rgba(255,250,241,.72); border-top: 1px solid rgba(255,226,166,.16); background: #15132d; }
+
+@media (min-width: 761px) {
+  .game-stage-section { padding-inline: clamp(10px, 2vw, 32px); }
+  .game-frame { width: min(95vw, 1800px); max-width: 1800px; }
+  .canvas-wrap { height: calc(100dvh - 170px); min-height: 0; aspect-ratio: auto; }
+}
+
+@media (min-width: 761px) and (max-height: 850px) {
+  .canvas-wrap { height: calc(100dvh - 140px); }
+  .game-hud { min-height: 72px; padding: 10px 18px; gap: 14px; }
+  .hud-stage strong { font-size: 18px; }
+  .hud-count strong { font-size: 19px; }
+  .sound-toggle { padding: 8px 11px; }
+  .game-controls { padding: 10px 16px; }
+  .control-hints span { padding-block: 5px; }
+  .overlay-card { padding: 56px 26px 20px; }
+  .overlay-mascot { height: 58px; }
+  .overlay-mascot img { width: 62px; height: 58px; }
+  .overlay-card h2 { margin-block: 8px; font-size: clamp(36px, 4.2vw, 50px); }
+  .overlay-card > p:not(.overlay-step) { font-size: 12px; line-height: 1.35; }
+  .instruction-grid { margin: 14px 0; }
+  .instruction-grid div { padding: 10px 8px; }
+  .instruction-grid span { font-size: 22px; }
+  .game-button { padding-block: 12px; }
+  .overlay-link { margin-top: 10px; }
+}
 
 @media (max-width: 760px) {
   .game-intro {
