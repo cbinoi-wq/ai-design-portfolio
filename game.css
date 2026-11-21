@@ -141,7 +141,7 @@
 .play-heading > p:first-child span { font-size: 13px; text-shadow: 0 0 18px rgba(255,217,130,.8); }
 .play-heading h2 { margin: 18px auto 15px; font: 400 clamp(45px, 6vw, 78px)/.92 var(--serif); letter-spacing: -.045em; text-wrap: balance; }
 .play-heading-copy { max-width: 610px; margin: 0 auto; color: rgba(255,250,241,.66); font-family: var(--serif); font-size: clamp(16px, 1.8vw, 21px); line-height: 1.4; }
-.game-frame { position: relative; z-index: 1; max-width: 1800px; margin: 0 auto; overflow: hidden; scroll-margin-top: 12px; border: 2px solid rgba(255,230,181,.56); border-radius: 36px; background: #1d1538; box-shadow: 0 40px 100px rgba(4,6,16,.5), 0 0 90px rgba(187,112,236,.2), inset 0 0 0 5px rgba(255,255,255,.035); }
+.game-frame { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; overflow: hidden; scroll-margin-top: 12px; border: 2px solid rgba(255,230,181,.56); border-radius: 36px; background: #1d1538; box-shadow: 0 40px 100px rgba(4,6,16,.5), 0 0 90px rgba(187,112,236,.2), inset 0 0 0 5px rgba(255,255,255,.035); }
 .game-frame::before { position: absolute; top: 10px; right: 22px; z-index: 4; color: rgba(255,231,169,.46); font-size: 11px; letter-spacing: 13px; content: "✦ · ✦ · ✦"; pointer-events: none; }
 
 .game-hud {
@@ -175,7 +175,6 @@
 .sound-toggle { padding: 10px 14px; border: 1px solid rgba(255,234,194,.34); border-radius: 99px; color: var(--game-paper); background: rgba(255,250,241,.065); font: 750 10px var(--sans); cursor: pointer; }
 .sound-toggle:hover, .sound-toggle:focus-visible { border-color: rgba(255,226,166,.72); background: rgba(255,250,241,.13); }
 .sound-toggle[aria-pressed="false"] { color: rgba(255,250,241,.5); }
-.sound-toggle.is-playing { border-color: rgba(255,225,166,.72); animation: musicPulse 1.8s ease-in-out infinite; }
 
 .canvas-wrap { position: relative; width: 100%; aspect-ratio: 48 / 31; min-height: 360px; overflow: hidden; border-bottom: 1px solid rgba(255,229,177,.18); background: #17142f; }
 #game-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath fill='%23fff2ad' stroke='%236c4a85' stroke-width='1.5' d='m14 1 2.7 9.8L27 14l-10.3 3.2L14 27l-2.7-9.8L1 14l10.3-3.2z'/%3E%3C/svg%3E") 14 14, crosshair; }
@@ -215,39 +214,6 @@
 
 @keyframes mascotBob { 50% { transform: translateY(-5px) rotate(2deg) scale(1.035,.97); } }
 @keyframes mascotTwinkle { 50% { opacity: .4; transform: scale(.75) rotate(25deg); } }
-@keyframes musicPulse { 50% { background: rgba(255,217,166,.14); box-shadow: 0 0 18px rgba(255,210,151,.28); transform: translateY(-1px); } }
-
-/* On laptops, size the complete game frame from the usable viewport height.
-   The 48:31 playfield, HUD, and controls now fit together without scrolling. */
-@media (min-width: 761px) {
-  .game-stage-section { padding-inline: clamp(10px, 2vw, 32px); }
-  .game-frame { width: min(88vw, 1600px); max-width: 1600px; }
-  .canvas-wrap { height: calc(100dvh - 170px); min-height: 0; aspect-ratio: auto; }
-}
-
-@media (min-width: 761px) and (max-height: 850px) {
-  .canvas-wrap { height: calc(100dvh - 140px); }
-  .game-hud { min-height: 72px; padding: 10px 18px; gap: 14px; }
-  .hud-stage strong { font-size: 18px; }
-  .hud-count strong { font-size: 19px; }
-  .sound-toggle { padding: 8px 11px; }
-  .game-controls { padding: 10px 16px; }
-  .control-hints span { padding-block: 5px; }
-  .overlay-card { padding: 56px 26px 20px; }
-  .overlay-mascot { height: 58px; }
-  .overlay-mascot img { width: 62px; height: 58px; }
-  .overlay-card h2 { margin-block: 8px; font-size: clamp(36px, 4.2vw, 50px); }
-  .overlay-card > p:not(.overlay-step) { font-size: 12px; line-height: 1.35; }
-  .instruction-grid { margin: 14px 0; }
-  .instruction-grid div { padding: 10px 8px; }
-  .instruction-grid span { font-size: 22px; }
-  .game-button { padding-block: 12px; }
-  .overlay-link { margin-top: 10px; }
-}
-
-@media (min-width: 761px) and (max-height: 720px) {
-  .game-frame { border-radius: 28px; }
-}
 
 .process-notes { max-width: 1220px; margin: 0 auto; padding: clamp(90px, 11vw, 165px) clamp(22px, 4vw, 45px); }
 .process-heading { display: grid; align-items: end; grid-template-columns: 1fr 1fr; gap: 18px 70px; }
@@ -337,5 +303,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .game-overlay, .noise-track i, .game-button { transition: none; }
-  .overlay-mascot img, .overlay-mascot span, .sound-toggle.is-playing { animation: none; }
+  .overlay-mascot img, .overlay-mascot span { animation: none; }
 }

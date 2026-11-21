@@ -29,13 +29,8 @@
   creatureImage.src = 'assets/swallow-static-creature.png?v=1';
   const creatureSpriteImage = new Image();
   creatureSpriteImage.src = 'assets/swallow-static-creature-sprites-v2.png?v=1';
-  const dreamMusic = new Audio('assets/dream-melody.wav?v=2');
-  dreamMusic.loop = true;
-  dreamMusic.preload = 'auto';
-  dreamMusic.volume = .48;
-
   const WORLD = { width: 960, height: 620 };
-  const MAX_WORLD_WIDTH = 1700;
+  const MAX_WORLD_WIDTH = 960;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const INTRO_STEP = 'FINAL GAME · WEEK 03';
   const stages = [
@@ -86,10 +81,6 @@
   let elapsed = 0;
   let audioEnabled = true;
   let audioContext = null;
-  let musicTimer = null;
-  let musicStarting = false;
-  let musicStep = 0;
-  let musicBus = null;
   let completionReady = false;
   let bumpCooldown = 0;
   let objectId = 0;
@@ -105,8 +96,6 @@
   const BASE_PLAYER_RADIUS = 26;
   const MAX_PLAYER_RADIUS = 54;
   const PLAYER_VISUAL_MARGIN_FACTOR = 2.55;
-  const DREAM_MELODY = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 783.99, 659.25, 587.33, 523.25, 392];
-
   const player = {
     x: WORLD.width * .5,
     y: WORLD.height * .57,
@@ -271,7 +260,7 @@
     overlay.classList.remove('is-visible');
     playing = true;
     lastTime = performance.now();
-    startDreamMusic();
+    ensureAudio();
     // Starting any stage restores the entire HUD, board, and controls to view,
     // even if the player scrolled inside the instruction card to reach Start.
     window.requestAnimationFrame(() => {
@@ -313,12 +302,11 @@
   }
 
   function ensureAudio() {
-    if (!audioEnabled) return Promise.resolve(null);
+    if (!audioEnabled) return;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return Promise.resolve(null);
+    if (!AudioContext) return;
     if (!audioContext) audioContext = new AudioContext();
-    if (audioContext.state === 'suspended') return audioContext.resume().then(() => audioContext);
-    return Promise.resolve(audioContext);
+    if (audioContext.state === 'suspended') audioContext.resume();
   }
 
   function tone(startFrequency, endFrequency, duration, volume, type = 'sine', delay = 0) {
@@ -339,97 +327,6 @@
     gain.connect(audioContext.destination);
     oscillator.start(now);
     oscillator.stop(now + duration + .03);
-  }
-
-  function playDreamMusicNote() {
-    if (!audioEnabled || !playing || !audioContext || audioContext.state !== 'running' || !musicBus) return;
-    const frequency = DREAM_MELODY[musicStep % DREAM_MELODY.length];
-    const now = audioContext.currentTime + .025;
-    const duration = .82;
-    const lead = audioContext.createOscillator();
-    const leadGain = audioContext.createGain();
-    lead.type = 'sine';
-    lead.frequency.setValueAtTime(frequency, now);
-    leadGain.gain.setValueAtTime(.0001, now);
-    leadGain.gain.exponentialRampToValueAtTime(.046, now + .08);
-    leadGain.gain.exponentialRampToValueAtTime(.0001, now + duration);
-    lead.connect(leadGain);
-    leadGain.connect(musicBus);
-    lead.start(now);
-    lead.stop(now + duration + .04);
-
-    if (musicStep % 4 === 0) {
-      const bass = audioContext.createOscillator();
-      const bassGain = audioContext.createGain();
-      bass.type = 'triangle';
-      bass.frequency.setValueAtTime(frequency / 2, now);
-      bassGain.gain.setValueAtTime(.0001, now);
-      bassGain.gain.exponentialRampToValueAtTime(.019, now + .11);
-      bassGain.gain.exponentialRampToValueAtTime(.0001, now + 1.05);
-      bass.connect(bassGain);
-      bassGain.connect(musicBus);
-      bass.start(now);
-      bass.stop(now + 1.1);
-    }
-    musicStep += 1;
-  }
-
-  function startSynthDreamMusic() {
-    if (!audioEnabled || musicTimer || musicStarting) return;
-    musicStarting = true;
-    ensureAudio().then((activeContext) => {
-      musicStarting = false;
-      if (!audioEnabled || !activeContext || musicTimer) return;
-      if (!musicBus) {
-        musicBus = activeContext.createGain();
-        musicBus.gain.setValueAtTime(.82, activeContext.currentTime);
-        musicBus.connect(activeContext.destination);
-      } else {
-        musicBus.gain.cancelScheduledValues(activeContext.currentTime);
-        musicBus.gain.setTargetAtTime(.82, activeContext.currentTime, .035);
-      }
-      playDreamMusicNote();
-      musicTimer = window.setInterval(playDreamMusicNote, 540);
-      soundToggle.classList.add('is-playing');
-      soundToggle.dataset.musicState = 'playing';
-    });
-  }
-
-  function markMusicPlaying() {
-    musicStarting = false;
-    soundToggle.classList.add('is-playing');
-    soundToggle.dataset.musicState = 'playing';
-  }
-
-  function startDreamMusic() {
-    if (!audioEnabled || musicStarting) return;
-    if (!dreamMusic.paused) {
-      markMusicPlaying();
-      return;
-    }
-    musicStarting = true;
-    const playAttempt = dreamMusic.play();
-    if (playAttempt && typeof playAttempt.then === 'function') {
-      playAttempt.then(markMusicPlaying).catch(() => {
-        musicStarting = false;
-        startSynthDreamMusic();
-      });
-    } else {
-      markMusicPlaying();
-    }
-  }
-
-  function stopDreamMusic() {
-    dreamMusic.pause();
-    if (musicTimer) window.clearInterval(musicTimer);
-    musicTimer = null;
-    musicStarting = false;
-    soundToggle.classList.remove('is-playing');
-    soundToggle.dataset.musicState = 'stopped';
-    if (audioContext && musicBus) {
-      musicBus.gain.cancelScheduledValues(audioContext.currentTime);
-      musicBus.gain.setTargetAtTime(.0001, audioContext.currentTime, .025);
-    }
   }
 
   function playGulp() {
@@ -1283,14 +1180,9 @@
   soundToggle.addEventListener('click', () => {
     audioEnabled = !audioEnabled;
     soundToggle.setAttribute('aria-pressed', String(audioEnabled));
-    soundToggle.setAttribute('aria-label', audioEnabled ? 'Mute dream music' : 'Turn on dream music');
-    soundToggle.innerHTML = `<span aria-hidden="true">♪</span> Music ${audioEnabled ? 'on' : 'off'}`;
-    if (audioEnabled) {
-      startDreamMusic();
-      playEcho();
-    } else {
-      stopDreamMusic();
-    }
+    soundToggle.setAttribute('aria-label', audioEnabled ? 'Mute game sound' : 'Turn on game sound');
+    soundToggle.innerHTML = `<span aria-hidden="true">♪</span> Sound ${audioEnabled ? 'on' : 'off'}`;
+    if (audioEnabled) playEcho();
   });
 
   restartButton.addEventListener('click', () => {
@@ -1299,15 +1191,10 @@
     showOverlay(
       INTRO_STEP,
       'Make some room to breathe.',
-      'Guide the little dreamer through the living city. Shimmering copies appear immediately, and the dream melody begins when you press Start.',
-      'Start game + music',
+      'Guide the little dreamer through the living city. Shimmering copies appear immediately, and every third real thought makes the creature noticeably bigger.',
+      'Start the game',
       beginGame
     );
-  });
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopDreamMusic();
-    else if (playing && audioEnabled) startDreamMusic();
   });
 
   window.addEventListener('resize', resizeCanvas);
